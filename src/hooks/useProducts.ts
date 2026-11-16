@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { CreateProductInput, Product } from '@/types/ecommerce'
 
@@ -11,6 +11,40 @@ export function useProducts() {
       if (error) throw new Error(error.message)
       return data as Product[]
     },
+  })
+}
+
+export const PRODUCT_SORTS = {
+  name: { label: 'Nom (A → Z)', column: 'name', ascending: true },
+  'price-asc': { label: 'Prix croissant', column: 'price', ascending: true },
+  'price-desc': { label: 'Prix décroissant', column: 'price', ascending: false },
+} as const
+export type ProductSort = keyof typeof PRODUCT_SORTS
+export const PRODUCTS_PAGE_SIZE = 4
+
+type ProductPageParams = { sort: ProductSort; category: string | null; page: number }
+
+// One page of the catalogue, sorted and filtered by the database (.order / .eq / .range):
+// only PRODUCTS_PAGE_SIZE rows travel, whatever the catalogue size. count gives the number of pages.
+export function useProductPage({ sort, category, page }: ProductPageParams) {
+  return useQuery({
+    // Every URL parameter is part of the key: each page / sort / filter combination has its own cache entry
+    queryKey: ['products', 'page', { sort, category, page }],
+    queryFn: async () => {
+      const { column, ascending } = PRODUCT_SORTS[sort]
+      let query = supabase.from('products').select('*', { count: 'exact' }).order(column, { ascending })
+      // Tie-breaker for equal prices, so a product never appears on two pages
+      if (column !== 'name') query = query.order('name')
+      if (category) query = query.eq('category', category)
+      const from = (page - 1) * PRODUCTS_PAGE_SIZE
+      const { data, error, count } = await query.range(from, from + PRODUCTS_PAGE_SIZE - 1)
+      // PGRST103: page beyond the last one (e.g. edited URL). Not an error for the visitor: an empty page
+      if (error?.code === 'PGRST103') return { products: [] as Product[], count: 0 }
+      if (error) throw new Error(error.message)
+      return { products: data as Product[], count: count ?? 0 }
+    },
+    // Keeps the current page displayed while the next one loads: no skeleton flash, no layout shift
+    placeholderData: keepPreviousData,
   })
 }
 

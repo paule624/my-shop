@@ -1,7 +1,13 @@
 import { Link } from 'react-router-dom'
 import CartPanel from '@/components/CartPanel'
 import ProductList from '@/features/products/ProductList'
+import { useProducts } from '@/hooks/useProducts'
+// Number of products shown on the home page
+const FEATURED_COUNT = 4
+
 function HomePage() {
+  const products = useProducts()
+
   return (
     <main id="home">
       <section className="intro-band">
@@ -31,7 +37,12 @@ function HomePage() {
             </div>
             <Link className="sort-label" to="/products">Toute la collection <span aria-hidden="true">↗</span></Link>
           </div>
-          <ProductList maxItems={4} />
+          <ProductList
+            status={products.status}
+            products={products.data?.slice(0, FEATURED_COUNT)}
+            errorMessage={products.error?.message}
+            skeletonCount={FEATURED_COUNT}
+          />
         </section>
         <CartPanel />
       </div>

@@ -27,6 +27,14 @@
 .section-heading .eyebrow, .cart-panel-heading .eyebrow { margin-bottom: 7px; }
 .section-heading h2, .cart-panel-heading h2 { margin: 0; color: var(--ink); font-family: var(--display); font-size: 27px; font-weight: 500; }
 .heading-count { margin-left: 4px; color: var(--coral); font-family: var(--body); font-size: 10px; font-weight: 700; vertical-align: super; }
+/* Catalogue filters (sort, category) and pagination, state kept in the URL */
+.catalog-filters { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px 10px; }
+.catalog-filters label { color: var(--muted); font-size: 11px; }
+.catalog-filters select { min-height: 32px; padding: 0 8px; border: 1px solid var(--muted); background: white; color: var(--ink); font: inherit; font-size: 12px; }
+.pagination { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; }
+.pagination p { color: var(--muted); }
+.pagination a { color: var(--ink); }
+.pagination a:last-child { justify-self: end; }
 .sort-label { padding-bottom: 3px; color: var(--muted); font-size: 11px; }
 .sort-label span { margin-left: 8px; color: var(--ink); }
 .product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 29px 20px; }

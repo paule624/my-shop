@@ -89,7 +89,7 @@ p {
 body { min-width: 320px; min-height: 100vh; margin: 0; }
 #root { width: 100%; max-width: none; min-height: 100vh; margin: 0; border: 0; text-align: left; }
 button { font-family: inherit; }
-button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; }
 ::selection { background: #e8c2b6; color: #202925; }
 
 @media (prefers-reduced-motion: reduce) {

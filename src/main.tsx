@@ -7,6 +7,7 @@ import '@fontsource-variable/dm-sans'
 import '@fontsource-variable/fraunces/opsz.css'
 import '@/index.css'
 import App from '@/App'
+import { AuthProvider } from '@/features/auth/AuthProvider'
 
 // Server state cache. Data stays fresh for 1 minute: navigating between pages
 // reuses the cache instead of refetching (writes invalidate their keys explicitly).
@@ -18,7 +19,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,

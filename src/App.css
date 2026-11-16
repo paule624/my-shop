@@ -3,9 +3,14 @@
 .wordmark { display: inline-flex; align-items: center; gap: 10px; width: fit-content; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 700; }
 .wordmark-mark { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: #bc5843; color: white; font-family: var(--display); font-size: 18px; font-style: italic; } /* darker coral: white text at 4.55:1 (was 3.58:1) */
 .main-nav { display: flex; align-items: center; justify-content: center; gap: 35px; height: 100%; }
-.nav-link { position: relative; height: 100%; padding: 0; border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
+/* inline-flex centers the label vertically for links too (only <button> did it natively) */
+.nav-link { position: relative; display: inline-flex; align-items: center; height: 100%; padding: 0; border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
 .nav-link.is-active { color: var(--ink); }
 .nav-link.is-active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--coral); content: ''; }
+/* Right column of the top bar: auth links + cart */
+.topbar-actions { justify-self: end; display: flex; align-items: center; gap: 22px; height: 100%; }
+.account-email { display: inline-block; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.account-short { display: none; }
 .cart-button { justify-self: end; display: inline-flex; align-items: center; gap: 10px; padding: 8px 0 8px 12px; border: 0; background: none; color: var(--ink); font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
 .cart-count { display: grid; min-width: 25px; height: 25px; padding: 0 6px; place-items: center; border-radius: 50%; background: var(--ink); color: white; font-size: 11px; }
 .intro-band { min-height: 260px; margin: 0 -54px; padding: 48px 54px 43px; display: flex; align-items: center; justify-content: space-between; background: var(--green-wash); animation: appear 480ms ease-out both; }
@@ -94,6 +99,17 @@
 /* Visually hidden but still announced by screen readers */
 /* Suspense fallback while a lazy route chunk loads */
 .route-fallback { min-height: 100vh; }
+/* Auth and account pages: full height, so the footer stays put when the lazy page replaces the loader */
+.auth-page, .account-page { min-height: 100vh; }
+.auth-form { display: grid; max-width: 380px; gap: 8px; margin-top: 32px; }
+.auth-form label { margin-top: 10px; color: var(--ink); font-size: 12px; font-weight: 700; }
+.field-hint { color: var(--muted); font-weight: 400; }
+/* 16px text avoids the iOS zoom on focus; border at 5:1 so the field outline is visible (WCAG 1.4.11) */
+.auth-form input { min-height: 44px; padding: 0 12px; border: 1px solid var(--muted); background: white; color: var(--ink); font: inherit; font-size: 16px; }
+.form-message { margin-top: 6px; color: var(--muted); font-size: 13px; }
+.auth-submit { justify-self: start; min-height: 40px; margin-top: 16px; font-size: 12px; }
+.auth-switch { margin-top: 20px; color: var(--muted); font-size: 13px; }
+.auth-switch a { color: var(--ink); }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .error-message { color: #a14337; }
 /* At least one viewport tall: the footer stays below the fold from the lazy-route fallback (100vh) to the loaded orders, so it never shifts in view (CLS) */
@@ -137,6 +153,9 @@
   .main-nav { gap: 15px; }
   .nav-link { font-size: 11px; }
   .cart-button { gap: 6px; font-size: 11px; }
+  .topbar-actions { gap: 12px; }
+  .account-email { display: none; }
+  .account-short { display: inline; }
   .intro-band { min-height: 0; margin-inline: -18px; padding: 40px 18px; }
   .intro-copy h1 { max-width: 390px; font-size: 42px; }
   .intro-description { max-width: 350px; font-size: 12px; }
@@ -160,6 +179,15 @@
   .order-row { grid-template-columns: 1fr 1fr; gap: 13px; padding: 15px 4px; }
   .order-status { grid-column: 1 / -1; }
   .site-footer { flex-direction: column; gap: 7px; }
+}
+
+/* Phones: two-row top bar (brand + account/cart, then navigation), so the auth links
+   never push the header wider than the screen. Fixed row heights: no shift when they appear. */
+@media (max-width: 520px) {
+  .topbar { height: auto; grid-template-columns: 1fr auto; grid-template-areas: "brand actions" "nav nav"; }
+  .wordmark { grid-area: brand; }
+  .topbar-actions { grid-area: actions; height: 52px; }
+  .main-nav { grid-area: nav; justify-content: flex-start; height: 40px; }
 }
 
 @media (max-width: 390px) {

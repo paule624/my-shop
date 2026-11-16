@@ -1,8 +1,10 @@
 import { lazy, Suspense } from 'react'
+import PageLoader from '@/components/PageLoader'
 import RouteAnnouncer from '@/components/RouteAnnouncer'
 import SiteFooter from '@/components/SiteFooter'
 import SiteHeader from '@/components/SiteHeader'
 import { Route, Routes, useLocation } from 'react-router-dom'
+import { ProtectedRoute } from '@/features/auth/ProtectedRoute'
 import { useCart } from '@/hooks/useCart'
 import { useProducts } from '@/hooks/useProducts'
 import HomePage from '@/pages/HomePage'
@@ -14,6 +16,18 @@ import '@/App.css'
 const OrdersPage = lazy(() => import('@/pages/OrdersPage'))
 const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
+const AuthPage = lazy(() => import('@/pages/AuthPage'))
+const AccountPage = lazy(() => import('@/pages/AccountPage'))
+
+// Human-readable page names, used for the tab title and the route change announcement
+const pageTitles: Record<string, string> = {
+  '/': 'Accueil',
+  '/products': 'Boutique',
+  '/orders': 'Commandes',
+  '/login': 'Connexion',
+  '/signup': 'Inscription',
+  '/account': 'Mon compte',
+}
 
 function App() {
   const { cart, itemCount, addToCart, removeFromCart, clearCart } = useCart()
@@ -32,18 +46,12 @@ function App() {
       ? 'products'
       : pathname === '/orders'
         ? 'orders'
-        : null
-  // Human-readable page name, used for the tab title and the route change announcement
+        : pathname === '/account'
+          ? 'account'
+          : null
   const productName = products.find((product) => pathname === `/products/${product.slug}`)?.name
-  const pageTitle = pathname === '/'
-    ? 'Accueil'
-    : pathname === '/products'
-      ? 'Boutique'
-      : pathname.startsWith('/products/')
-        ? productName ?? 'Fiche produit'
-        : pathname === '/orders'
-          ? 'Commandes'
-          : 'Page introuvable'
+  const pageTitle = pageTitles[pathname]
+    ?? (pathname.startsWith('/products/') ? productName ?? 'Fiche produit' : 'Page introuvable')
 
   return (
     <div className="app-shell">
@@ -52,19 +60,16 @@ function App() {
         activePage={activePage}
         cartCount={itemCount}
       />
-      <Suspense
-        fallback={(
-          // Full-height placeholder keeps the footer below the fold while a route chunk loads (no layout shift)
-          <main className="route-fallback">
-            <p className="fetch-message" role="status">Chargement de la page…</p>
-          </main>
-        )}
-      >
+      <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<HomePage {...pageProps} />} />
           <Route path="/products" element={<ProductsPage {...pageProps} />} />
           <Route path="/products/:slug" element={<ProductDetailPage {...pageProps} />} />
           <Route path="/orders" element={<OrdersPage />} />
+          {/* key: switching between the two modes remounts the form (no leftover error message) */}
+          <Route path="/login" element={<AuthPage key="login" mode="login" />} />
+          <Route path="/signup" element={<AuthPage key="signup" mode="signup" />} />
+          <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>

@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '@/features/auth/AuthContext'
+import { supabase } from '@/lib/supabase'
 
 type SiteHeaderProps = {
-  activePage: 'home' | 'products' | 'orders' | null
+  activePage: 'home' | 'products' | 'orders' | 'account' | null
   cartCount: number
 }
 
 function SiteHeader({ activePage, cartCount }: SiteHeaderProps) {
+  const { session, booted } = useAuth()
+
   return (
     <header className="topbar">
       <Link className="wordmark" to="/">
@@ -23,16 +27,33 @@ function SiteHeader({ activePage, cartCount }: SiteHeaderProps) {
           Commandes
         </Link>
       </nav>
-      <Link
-        className="cart-button"
-        to={activePage === 'home' || activePage === 'products' ? '#basket' : '/#basket'}
-      >
-        {/* Accessible name comes from the content ("Panier 0 article(s)"), so it always contains
-            the visible text (WCAG 2.5.3 label in name) instead of diverging through an aria-label */}
-        <span>Panier</span>{' '}
-        <span className="cart-count">{cartCount}</span>{' '}
-        <span className="sr-only">article(s)</span>
-      </Link>
+      <div className="topbar-actions">
+        {/* Rendered once the stored session is read: a signed-in user never sees "Connexion" flash */}
+        {booted && (session ? (
+          <>
+            <Link className={`nav-link account-link${activePage === 'account' ? ' is-active' : ''}`} to="/account">
+              {/* Full email on desktop, short label on small screens (only one is displayed) */}
+              <span className="account-email">{session.user.email}</span>
+              <span className="account-short">Compte</span>
+            </Link>
+            <button className="nav-link" type="button" onClick={() => supabase.auth.signOut()}>
+              Déconnexion
+            </button>
+          </>
+        ) : (
+          <Link className="nav-link" to="/login">Connexion</Link>
+        ))}
+        <Link
+          className="cart-button"
+          to={activePage === 'home' || activePage === 'products' ? '#basket' : '/#basket'}
+        >
+          {/* Accessible name comes from the content ("Panier 0 article(s)"), so it always contains
+              the visible text (WCAG 2.5.3 label in name) instead of diverging through an aria-label */}
+          <span>Panier</span>{' '}
+          <span className="cart-count">{cartCount}</span>{' '}
+          <span className="sr-only">article(s)</span>
+        </Link>
+      </div>
     </header>
   )
 }

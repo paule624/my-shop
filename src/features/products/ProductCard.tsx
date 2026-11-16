@@ -14,7 +14,9 @@ type ProductCardProps = {
 function ProductCard({ product, onAddToCart, priority = false }: ProductCardProps) {
   return (
     <article className="product-card">
-      <Link className="product-image-link" to={`/products/${product.id}`} aria-label={`Voir ${product.name}`}>
+      {/* Redundant with the title link below: kept clickable for the mouse, but removed from
+          the tab order and the accessibility tree (one link per card for keyboard / screen readers) */}
+      <Link className="product-image-link" to={`/products/${product.id}`} aria-hidden="true" tabIndex={-1}>
         <div className="product-image-wrap">
           {product.image && (
             <ProductImage src={product.image} alt={product.name} sizes={CARD_IMAGE_SIZES} priority={priority} />

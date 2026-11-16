@@ -186,7 +186,7 @@
 .app-shell { width: min(1360px, 100%); min-height: 100vh; margin: 0 auto; padding: 0 54px; display: flex; flex-direction: column; text-align: left; }
 .topbar { height: 82px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; border-bottom: 1px solid var(--line); }
 .wordmark { display: inline-flex; align-items: center; gap: 10px; width: fit-content; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 700; }
-.wordmark-mark { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: var(--coral); color: white; font-family: var(--display); font-size: 18px; font-style: italic; }
+.wordmark-mark { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: #bc5843; color: white; font-family: var(--display); font-size: 18px; font-style: italic; } /* darker coral: white text at 4.55:1 (was 3.58:1) */
 .main-nav { display: flex; align-items: center; justify-content: center; gap: 35px; height: 100%; }
 .nav-link { position: relative; height: 100%; padding: 0; border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
 .nav-link.is-active { color: var(--ink); }
@@ -353,7 +353,8 @@
   .wordmark { font-size: 10px; }
   .main-nav { gap: 10px; }
   .nav-link { font-size: 10px; }
-  .cart-button > span:first-child { display: none; }
+  /* Visually hidden (not display: none) so screen readers still get "Panier" in the link name */
+  .cart-button > span:first-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
   .product-grid { grid-template-columns: 1fr; }
   .product-image-wrap { aspect-ratio: 1.35 / 1; }
   .product-title-row { align-items: baseline; flex-direction: row; }

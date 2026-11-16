@@ -120,7 +120,8 @@ code {
   --body: 'DM Sans Variable', sans-serif;
   --display: 'Fraunces Variable', Georgia, serif;
   --ink: #202925;
-  --muted: #78817b;
+  /* Darkened from #78817b (3.53–3.98:1) to pass WCAG AA 4.5:1 on both #fffefa and #edf2e9 */
+  --muted: #676f6a;
   --line: #e8e9e2;
   --coral: #d7654d;
   --green: #3d705b;

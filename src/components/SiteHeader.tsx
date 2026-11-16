@@ -26,10 +26,12 @@ function SiteHeader({ activePage, cartCount }: SiteHeaderProps) {
       <Link
         className="cart-button"
         to={activePage === 'home' || activePage === 'products' ? '#basket' : '/#basket'}
-        aria-label={`Voir le panier, ${cartCount} article(s)`}
       >
-        <span>Panier</span>
-        <span className="cart-count">{cartCount}</span>
+        {/* Accessible name comes from the content ("Panier 0 article(s)"), so it always contains
+            the visible text (WCAG 2.5.3 label in name) instead of diverging through an aria-label */}
+        <span>Panier</span>{' '}
+        <span className="cart-count">{cartCount}</span>{' '}
+        <span className="sr-only">article(s)</span>
       </Link>
     </header>
   )

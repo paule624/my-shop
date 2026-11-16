@@ -13,6 +13,8 @@ Commits :
 | Accessibilité (images) | `acf1577` `a11y: descriptive image alt text, hide decorative back arrow` |
 | Éco-conception (CSS mort) | `360db06` `eco: remove dead Vite template CSS and unused variables` |
 | Éco-conception | `234357e` `eco: add lightweight favicon, robots.txt, print styles, remove unused template assets` |
+| Re-renders (séance 4, panier Zustand) | `38fa2e3` `feat: checkout and my orders` |
+| Performance (séance 4) | `6983f7a` `perf: preconnect to the Supabase API origin` |
 
 `npx tsc --noEmit` : ✅ aucune erreur.
 
@@ -157,3 +159,48 @@ La plus grosse réduction de poids vient des corrections perf **P2** (images −
 - **Pistes éco non appliquées.** Charger la police Fraunces sans l'axe de taille optique (`opsz`) ferait 67 → 37 Ko, soit −30 Ko par page, au prix d'un rendu un peu différent des grands titres. `products.json` est aussi chargé sur `/orders` sans y servir (1 requête, 1 Ko).
 - **CLS résiduel de 0,016** sur `.shop-layout` (`/products`), déjà présent avant les corrections.
 - **Première mesure écartée.** Le premier audit Lighthouse avait été fait sur le serveur de dev (`:5173`, React non minifié à 3,1 Mo, extensions Chrome actives). Il n'est pas représentatif et a été refait sur le build de production.
+
+---
+
+## 6. Séance 4 : remesure après le passage sur Supabase
+
+Le TP de la séance 4 a remplacé le JSON local par Supabase, puis ajouté l'authentification, les commandes et l'admin. Même protocole qu'au § 1 : build de prod sur le port 4173, Lighthouse mobile, médianes de 3 passages.
+
+| Métrique | Séance 3 « après » | Supabase (`0ceaa96`) | + preconnect (`6983f7a`) |
+|---|---|---|---|
+| **`/` Performance** | 97 | 92 | **94** |
+| `/` LCP | 2,6 s | 3,3 s | **3,09 s** |
+| `/` FCP · TBT · CLS | 0,8 s · 0 ms · 0 | 0,8 s · 0 ms · 0,003 | 0,8 s · 0 ms · 0,003 |
+| `/` Requêtes · Poids | 11 · 236 Ko | 16 · 325 Ko | 16 · 325 Ko |
+| **`/products` Performance** | 97 | 94 | 93 |
+| `/products` LCP | 2,6 s | 3,2 s | 3,16 s |
+| `/products` CLS | 0,016 | 0,016 | 0,049 (2 passages sur 3) |
+| `/products` Requêtes · Poids | 13 · 269 Ko | 18 · 339 Ko | 18 · 339 Ko |
+| JS au premier chargement | ≈ 86 Ko gzip | 152 Kio transférés | 152 Kio transférés |
+
+**Lecture des chiffres.** Supabase coûte 5 points sur `/` et 3 sur `/products` :
+
+- **+66 Kio de JS.** Le SDK `@supabase/supabase-js` pèse 58 Kio à lui seul : il embarque aussi le temps réel, le stockage et les fonctions, que l'application n'utilise pas. React Query ajoute environ 6 Kio. Le bundler découpe ce code en 4 fichiers supplémentaires, préchargés en parallèle.
+- **+2 requêtes réseau vers un domaine tiers** avant de connaître l'image LCP : une requête de vérification CORS (*preflight*), due aux en-têtes `apikey` et `Authorization` du SDK, puis la lecture des produits. Le LCP prend +0,6 à +0,7 s.
+
+**Correction P5 : `preconnect` vers l'API.** Elle ouvre la connexion pendant le téléchargement du JS. L'URL vient du `.env` au moment du build, et l'attribut `crossorigin` est nécessaire parce que `fetch` en CORS utilise sa propre connexion.
+- `/` : LCP 3,3 → **3,09 s**, note 92 → **94**.
+- `/products` : neutre (LCP 3,2 → 3,16 s, note 94 → 93).
+- Le CLS de `/products` monte à 0,049 sur 2 passages sur 3, toujours sur `.shop-layout`. C'est le décalage résiduel du § 5 : les données arrivent plus tôt, donc parfois avant les polices, et le texte se remet en page.
+
+**Re-renders (axe 4 du mémo), mesuré.** Compteur temporaire dans `ProductCard`, sur `/products` avec 6 cartes et 3 ajouts au panier, en mode dev, où le mode strict de React double chaque rendu :
+
+| | Rendus de `ProductCard` par ajout au panier |
+|---|---|
+| Panier dans `App` (`cbc5e0d`), transmis par props | **12** (les 6 cartes × 2) |
+| Panier dans un store Zustand (`38fa2e3`), lu par sélecteurs | **0** |
+
+Chaque composant ne s'abonne qu'à la partie du panier qu'il lit. Les cartes ne lisent que l'action `addToCart`, une fonction stable, et ne sont plus redessinées.
+
+**Accessibilité des nouvelles pages.**
+- Lighthouse donne **100** sur `/login` et `/signup`.
+- **axe-core** (le moteur de l'extension axe DevTools), avec une session admin, ne trouve aucune violation WCAG 2.1 AA ni de bonne pratique sur `/`, `/products`, la fiche produit, `/account`, `/admin` et `/admin/orders`. Le test inclut le formulaire produit et la fenêtre de confirmation ouverts.
+
+**Pistes non appliquées :**
+- importer seulement `@supabase/postgrest-js` + `@supabase/auth-js` au lieu du SDK complet (gain non mesuré, et ça s'écarte du code du TP) ;
+- un rendu serveur ou statique, pour que la liste des produits soit dans le HTML et qu'on évite l'aller-retour CORS avant le LCP.

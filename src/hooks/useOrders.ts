@@ -30,8 +30,8 @@ export function useMyOrders() {
   })
 }
 
-// Creates the order then its lines. Two inserts, not atomic (accepted TP simplification):
-// if the second one fails, an empty order remains.
+// Creates the order and its lines through the place_order SQL function (supabase/05-place-order.sql):
+// one transaction, so either everything is saved or nothing is (no empty order left on failure).
 export function usePlaceOrder() {
   const { session } = useAuth()
   const queryClient = useQueryClient()
@@ -40,17 +40,11 @@ export function usePlaceOrder() {
   return useMutation({
     mutationFn: async (lines: CartLine[]) => {
       if (!session) throw new Error('Connectez-vous pour commander.')
-      const { data: order, error } = await supabase
-        .from('orders')
-        .insert({ user_id: session.user.id })
-        .select()
-        .single()
+      // Only ids and quantities are sent: the user comes from the session, stock is checked by the server
+      const { error } = await supabase.rpc('place_order', {
+        items: lines.map((line) => ({ product_id: line.productId, quantity: line.quantity })),
+      })
       if (error) throw new Error(error.message)
-
-      const { error: itemsError } = await supabase.from('order_items').insert(
-        lines.map((line) => ({ order_id: order.id, product_id: line.productId, quantity: line.quantity })),
-      )
-      if (itemsError) throw new Error(itemsError.message)
     },
     onSuccess: () => {
       // Every write invalidates the keys it changes: the orders list refetches next time it is shown

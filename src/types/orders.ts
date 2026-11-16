@@ -14,6 +14,23 @@ export interface Order {
   cancellationReason?: string
 }
 
+// Row of the Supabase `orders` table as read on /account, with its lines (nested select)
+export interface AccountOrder {
+  id: string
+  status: OrderStatus
+  created_at: string
+  order_items: {
+    quantity: number
+    // Many-to-one relation (order_items.product_id -> products): a single object
+    products: { name: string; price: number }
+  }[]
+}
+
+// Computed from the current product prices (the TP schema stores no unit price on the line)
+export function orderTotal(order: AccountOrder): number {
+  return order.order_items.reduce((total, line) => total + line.quantity * line.products.price, 0)
+}
+
 export type OrderEvent =
   | { type: 'place' }
   | { type: 'pay'; paymentRef: string }

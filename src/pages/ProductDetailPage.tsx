@@ -1,28 +1,17 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CartPanel from '@/components/CartPanel'
 import ProductImage from '@/features/products/ProductImage'
+import { useCartStore } from '@/features/cart/store'
 import { useProduct } from '@/hooks/useProducts'
-import type { Cart } from '@/types/ecommerce'
 
 // Detail image width per breakpoint, mirrors .shop-layout and .product-detail-card (max 720px) in App.css
 const DETAIL_IMAGE_SIZES = '(max-width: 720px) calc(100vw - 36px), (max-width: 1000px) calc(100vw - 328px), 720px'
 
-type ProductDetailPageProps = {
-  cart: Cart
-  onAddToCart: (productId: string) => void
-  onRemoveFromCart: (productId: string) => void
-  onClearCart: () => void
-}
-
-function ProductDetailPage({
-  cart,
-  onAddToCart,
-  onRemoveFromCart,
-  onClearCart,
-}: ProductDetailPageProps) {
+function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const productResult = useProduct(slug)
+  const addToCart = useCartStore((state) => state.addToCart)
   const product = productResult.data
 
   return (
@@ -75,7 +64,7 @@ function ProductDetailPage({
                     className="add-button"
                     type="button"
                     disabled={!product.in_stock}
-                    onClick={() => onAddToCart(product.id)}
+                    onClick={() => addToCart(product.id)}
                   >
                     Ajouter au panier <span aria-hidden="true">＋</span>
                   </button>
@@ -84,11 +73,7 @@ function ProductDetailPage({
             </article>
           )}
         </section>
-        <CartPanel
-          cart={cart}
-          onRemove={onRemoveFromCart}
-          onClear={onClearCart}
-        />
+        <CartPanel />
       </div>
     </main>
   )

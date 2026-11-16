@@ -1,17 +1,20 @@
 import type { Product } from '@/types/ecommerce'
 import { Link } from 'react-router-dom'
 import ProductImage from '@/features/products/ProductImage'
+import { useCartStore } from '@/features/cart/store'
 
 // Card image width per breakpoint, mirrors .app-shell / .shop-layout / .product-grid in App.css
 const CARD_IMAGE_SIZES = '(max-width: 390px) calc(100vw - 26px), (max-width: 720px) calc(50vw - 25px), (max-width: 1000px) calc(50vw - 174px), 460px'
 
 type ProductCardProps = {
   product: Product
-  onAddToCart: (productId: string) => void
   priority?: boolean
 }
 
-function ProductCard({ product, onAddToCart, priority = false }: ProductCardProps) {
+function ProductCard({ product, priority = false }: ProductCardProps) {
+  // Selects only the action (a stable function): adding to the cart does not re-render the cards
+  const addToCart = useCartStore((state) => state.addToCart)
+
   return (
     <article className="product-card">
       {/* Redundant with the title link below: kept clickable for the mouse, but removed from
@@ -40,7 +43,7 @@ function ProductCard({ product, onAddToCart, priority = false }: ProductCardProp
             className="add-button"
             type="button"
             disabled={!product.in_stock}
-            onClick={() => onAddToCart(product.id)}
+            onClick={() => addToCart(product.id)}
           >
             Ajouter au panier
             <span aria-hidden="true">＋</span>

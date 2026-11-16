@@ -7,11 +7,10 @@ import ProductCardSkeleton from '@/features/products/ProductCardSkeleton'
 const DEFAULT_SKELETON_COUNT = 6
 
 type ProductListProps = {
-  onAddToCart: (productId: string) => void
   maxItems?: number
 }
 
-function ProductList({ onAddToCart, maxItems }: ProductListProps) {
+function ProductList({ maxItems }: ProductListProps) {
   // Reads the catalogue straight from the React Query cache (no prop drilling from App)
   const result = useProducts()
   let content: ReactNode
@@ -35,7 +34,7 @@ function ProductList({ onAddToCart, maxItems }: ProductListProps) {
       content = products.length > 0
         ? products.map((product, index) => (
             // First card holds the LCP image: load it with high priority, lazy-load the rest
-            <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} priority={index === 0} />
+            <ProductCard key={product.id} product={product} priority={index === 0} />
           ))
         : <p className="fetch-message">Aucun produit à afficher pour le moment.</p>
       break

@@ -1,17 +1,21 @@
+import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '@/features/auth/AuthContext'
+import { selectItemCount, useCartStore } from '@/features/cart/store'
+import { usePlaceOrder } from '@/hooks/useOrders'
 import { useProducts } from '@/hooks/useProducts'
-import type { Cart } from '@/types/ecommerce'
 
-type CartPanelProps = {
-  cart: Cart
-  onRemove: (productId: string) => void
-  onClear: () => void
-}
-
-function CartPanel({ cart, onRemove, onClear }: CartPanelProps) {
+function CartPanel() {
+  // Cart from the Zustand store (no props from App)
+  const cart = useCartStore((state) => state.cart)
+  const itemCount = useCartStore(selectItemCount)
+  const removeFromCart = useCartStore((state) => state.removeFromCart)
+  const clearCart = useCartStore((state) => state.clearCart)
   // Same cached query as the product list: no extra request, used to show product names
   const { data: products = [] } = useProducts()
+  const { session } = useAuth()
+  const location = useLocation()
+  const placeOrder = usePlaceOrder()
   const lines = Object.values(cart)
-  const itemCount = lines.reduce((total, line) => total + line.quantity, 0)
   const getProductName = (productId: string) =>
     products.find((product) => product.id === productId)?.name ?? productId
 
@@ -25,11 +29,19 @@ function CartPanel({ cart, onRemove, onClear }: CartPanelProps) {
         <span className="basket-icon" aria-hidden="true">↗</span>
       </div>
       {lines.length === 0 ? (
-        <div className="empty-cart">
-          <span className="empty-cart-mark" aria-hidden="true">＋</span>
-          <p>Votre panier est encore vide.</p>
-          <span>Les belles trouvailles sont juste à côté.</span>
-        </div>
+        placeOrder.isSuccess ? (
+          <div className="empty-cart" role="status">
+            <span className="empty-cart-mark" aria-hidden="true">✓</span>
+            <p>Commande enregistrée, merci !</p>
+            <Link to="/account">Voir mes commandes</Link>
+          </div>
+        ) : (
+          <div className="empty-cart">
+            <span className="empty-cart-mark" aria-hidden="true">＋</span>
+            <p>Votre panier est encore vide.</p>
+            <span>Les belles trouvailles sont juste à côté.</span>
+          </div>
+        )
       ) : (
         <div className="cart-lines">
           {lines.map((line) => (
@@ -42,14 +54,32 @@ function CartPanel({ cart, onRemove, onClear }: CartPanelProps) {
               <button
                 className="remove-button"
                 type="button"
-                onClick={() => onRemove(line.productId)}
+                onClick={() => removeFromCart(line.productId)}
                 aria-label={`Retirer ${getProductName(line.productId)} du panier`}
               >
                 Retirer
               </button>
             </div>
           ))}
-          <button className="clear-cart" type="button" onClick={onClear}>
+          {session ? (
+            <button
+              className="add-button checkout-button"
+              type="button"
+              disabled={placeOrder.isPending}
+              onClick={() => placeOrder.mutate(lines)}
+            >
+              {placeOrder.isPending ? 'Commande en cours…' : 'Commander'}
+            </button>
+          ) : (
+            // Ordering needs an account: come back to this page after signing in
+            <Link className="add-button checkout-button" to="/login" state={{ from: location.pathname }}>
+              Se connecter pour commander
+            </Link>
+          )}
+          {placeOrder.isError && (
+            <p className="form-message error-message" role="alert">{placeOrder.error.message}</p>
+          )}
+          <button className="clear-cart" type="button" onClick={clearCart}>
             Vider le panier
           </button>
         </div>

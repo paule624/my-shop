@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth/AuthContext'
+import { selectItemCount, useCartStore } from '@/features/cart/store'
 import { supabase } from '@/lib/supabase'
 
 type SiteHeaderProps = {
   activePage: 'home' | 'products' | 'orders' | 'account' | null
-  cartCount: number
 }
 
-function SiteHeader({ activePage, cartCount }: SiteHeaderProps) {
+function SiteHeader({ activePage }: SiteHeaderProps) {
   const { session, booted } = useAuth()
+  const cartCount = useCartStore(selectItemCount)
 
   return (
     <header className="topbar">

@@ -40,7 +40,7 @@ function ProductDetailPage({
             type="button"
             onClick={() => navigate('/products')}
           >
-            ← Retour à la boutique
+            <span aria-hidden="true">←</span> Retour à la boutique
           </button>
         </div>
       </section>
@@ -59,7 +59,7 @@ function ProductDetailPage({
             <article className="product-detail-card">
               <div className="product-image-wrap">
                 {product.image && (
-                  <ProductImage src={product.image} alt={product.name} sizes={DETAIL_IMAGE_SIZES} priority />
+                  <ProductImage src={product.image} alt={product.imageAlt ?? product.name} sizes={DETAIL_IMAGE_SIZES} priority />
                 )}
                 {product.badge && <span className="product-badge">{product.badge}</span>}
                 {product.category && <span className="product-category">{product.category}</span>}

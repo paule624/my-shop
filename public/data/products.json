@@ -7,7 +7,8 @@
     "image": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=85",
     "price": 129,
     "inStock": true,
-    "badge": "Coup de cœur"
+    "badge": "Coup de cœur",
+    "imageAlt": "Lampadaire en métal gris anthracite à abat-jour en dôme, devant un mur blanc"
   },
   {
     "id": "vase-sillage",
@@ -17,7 +18,8 @@
     "image": "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=900&q=85",
     "price": 58,
     "inStock": true,
-    "badge": "Fait main"
+    "badge": "Fait main",
+    "imageAlt": "Vase en verre ambré garni d’herbes de la pampa séchées, posé au sol à côté d’un canapé beige"
   },
   {
     "id": "tasse-atelier",
@@ -26,7 +28,8 @@
     "description": "Une anse généreuse et un émail vert profond.",
     "image": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=85",
     "price": 24,
-    "inStock": true
+    "inStock": true,
+    "imageAlt": "Tasse blanche aux formes arrondies posée sur une table blanche"
   },
   {
     "id": "plaid-nuage",
@@ -35,7 +38,8 @@
     "description": "Coton recyclé tissé dans les Hauts-de-France.",
     "image": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=85",
     "price": 89,
-    "inStock": true
+    "inStock": true,
+    "imageAlt": "Salon lumineux avec canapé en cuir camel, fauteuils blancs et plaid gris posé sur un fauteuil"
   },
   {
     "id": "plateau-ligne",
@@ -45,7 +49,8 @@
     "image": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=900&q=85",
     "price": 46,
     "inStock": true,
-    "badge": "Nouveau"
+    "badge": "Nouveau",
+    "imageAlt": "Salon aux grandes baies vitrées avec canapé gris, table basse en bois et poufs en cuir"
   },
   {
     "id": "bougie-empreinte",
@@ -54,6 +59,7 @@
     "description": "Cire végétale, parfum de figuier et de bois blond.",
     "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=900&q=85",
     "price": 32,
-    "inStock": false
+    "inStock": false,
+    "imageAlt": "Bougie allumée dans un photophore en verre, posée sur une fausse fourrure blanche entourée d’une guirlande lumineuse"
   }
 ]

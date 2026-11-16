@@ -6,6 +6,8 @@ export interface Product {
   category?: string
   description?: string
   image?: string
+  // Describes what the photo actually shows (alt text); falls back to the product name
+  imageAlt?: string
   badge?: string
 }
 

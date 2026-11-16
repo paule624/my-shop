@@ -1,17 +1,24 @@
 import type { Product } from '@/types/ecommerce'
 import { Link } from 'react-router-dom'
+import ProductImage from '@/features/products/ProductImage'
+
+// Card image width per breakpoint, mirrors .app-shell / .shop-layout / .product-grid in App.css
+const CARD_IMAGE_SIZES = '(max-width: 390px) calc(100vw - 26px), (max-width: 720px) calc(50vw - 25px), (max-width: 1000px) calc(50vw - 174px), 460px'
 
 type ProductCardProps = {
   product: Product
   onAddToCart: (productId: string) => void
+  priority?: boolean
 }
 
-function ProductCard({ product, onAddToCart }: ProductCardProps) {
+function ProductCard({ product, onAddToCart, priority = false }: ProductCardProps) {
   return (
     <article className="product-card">
       <Link className="product-image-link" to={`/products/${product.id}`} aria-label={`Voir ${product.name}`}>
         <div className="product-image-wrap">
-          {product.image && <img className="product-image" src={product.image} alt={product.name} />}
+          {product.image && (
+            <ProductImage src={product.image} alt={product.name} sizes={CARD_IMAGE_SIZES} priority={priority} />
+          )}
           {product.badge && <span className="product-badge">{product.badge}</span>}
           {product.category && <span className="product-category">{product.category}</span>}
         </div>

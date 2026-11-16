@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500&display=swap');
+/* Fonts are self-hosted via @fontsource-variable (imported in main.tsx), no render-blocking third-party CSS */
 
 :root {
   --text: #6b6375;
@@ -113,12 +113,12 @@ code {
 }
 
 :root {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans Variable', sans-serif;
   color: #202925;
   background: #fffefa;
   color-scheme: light;
-  --body: 'DM Sans', sans-serif;
-  --display: 'Fraunces', Georgia, serif;
+  --body: 'DM Sans Variable', sans-serif;
+  --display: 'Fraunces Variable', Georgia, serif;
   --ink: #202925;
   --muted: #78817b;
   --line: #e8e9e2;

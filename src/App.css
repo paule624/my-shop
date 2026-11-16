@@ -273,6 +273,15 @@
 .not-found-page > p:not(.eyebrow) { color: var(--muted); font-size: 13px; }
 .not-found-page .add-button { margin-top: 8px; }
 .fetch-message { padding: 30px 0; color: var(--muted); font-size: 13px; }
+/* Loading skeleton: same boxes as real cards, text hidden behind grey bars, no animation */
+.product-card-skeleton { animation: none; color: transparent; pointer-events: none; }
+.product-card-skeleton .product-title-row h3, .product-card-skeleton .product-price, .product-card-skeleton .product-details > p, .product-card-skeleton .stock-status { color: transparent; }
+.product-card-skeleton .skeleton-text { background: #e9e8e0; }
+.product-card-skeleton .add-button { border-color: #e9e8e0; color: transparent; cursor: default; }
+/* Visually hidden but still announced by screen readers */
+/* Suspense fallback while a lazy route chunk loads */
+.route-fallback { min-height: 100vh; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .error-message { color: #a14337; }
 .orders-page { min-height: 650px; padding: 72px 0 90px; }
 .orders-intro { padding: 35px 40px; background: var(--green-wash); animation: appear 450ms ease-out both; }

@@ -1,6 +1,10 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CartPanel from '@/components/CartPanel'
+import ProductImage from '@/features/products/ProductImage'
 import type { Cart, FetchResult, Product } from '@/types/ecommerce'
+
+// Detail image width per breakpoint, mirrors .shop-layout and .product-detail-card (max 720px) in App.css
+const DETAIL_IMAGE_SIZES = '(max-width: 720px) calc(100vw - 36px), (max-width: 1000px) calc(100vw - 328px), 720px'
 
 type ProductDetailPageProps = {
   cart: Cart
@@ -54,7 +58,9 @@ function ProductDetailPage({
           ) : (
             <article className="product-detail-card">
               <div className="product-image-wrap">
-                {product.image && <img className="product-image" src={product.image} alt={product.name} />}
+                {product.image && (
+                  <ProductImage src={product.image} alt={product.name} sizes={DETAIL_IMAGE_SIZES} priority />
+                )}
                 {product.badge && <span className="product-badge">{product.badge}</span>}
                 {product.category && <span className="product-category">{product.category}</span>}
               </div>

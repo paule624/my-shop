@@ -10,6 +10,8 @@
     <!-- Explicit lightweight icon: avoids the browser's default /favicon.ico request (404) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://images.unsplash.com" />
+    <!-- API origin, injected from .env at build time. crossorigin: fetch() uses CORS, which needs its own connection -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
   </head>
   <body>
     <div id="root"></div>

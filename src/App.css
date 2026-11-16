@@ -126,6 +126,8 @@
 .admin-nav a { padding-bottom: 4px; color: var(--muted); font-size: 13px; text-decoration: none; }
 .admin-nav a[aria-current="page"] { border-bottom: 2px solid var(--coral); color: var(--ink); }
 .admin-create { min-height: 40px; padding: 0 16px; border-color: var(--ink); background: var(--ink); color: white; font-size: 12px; }
+.orders-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+.orders-toolbar .orders-total { margin: 0; }
 .table-scroll { overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; color: var(--ink); font-size: 12px; text-align: left; }
 .data-table th { padding: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 10px; font-weight: 500; white-space: nowrap; }

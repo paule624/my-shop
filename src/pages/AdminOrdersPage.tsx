@@ -1,6 +1,7 @@
 import DataTable, { type Column } from '@/components/DataTable'
 import AdminHeader from '@/features/admin/AdminHeader'
 import { useAllOrders } from '@/hooks/useOrders'
+import { downloadCsv } from '@/lib/csv'
 import { labelStatus, orderTotal, type AdminOrder, type OrderStatus } from '@/types/orders'
 
 const orderStatuses: OrderStatus[] = ['pending', 'paid', 'shipped', 'cancelled']
@@ -17,6 +18,22 @@ const columns: Column<AdminOrder>[] = [
     cell: (order) => <span className={`order-status status-${order.status}`}>{labelStatus(order.status)}</span>,
   },
 ]
+
+// Same columns as the table, as plain text (full order id and ISO date: exact values for a spreadsheet)
+function exportOrders(orders: AdminOrder[]) {
+  downloadCsv(
+    `commandes-${new Date().toISOString().slice(0, 10)}.csv`,
+    ['Commande', 'Client', 'Date', 'Articles', 'Total (€)', 'Statut'],
+    orders.map((order) => [
+      order.id,
+      order.email ?? '',
+      order.created_at,
+      order.order_items.map((line) => `${line.products.name} × ${line.quantity}`).join(', '),
+      String(orderTotal(order)),
+      labelStatus(order.status),
+    ]),
+  )
+}
 
 function AdminOrdersPage() {
   const orders = useAllOrders()
@@ -41,10 +58,20 @@ function AdminOrdersPage() {
                   </div>
                 ))}
               </dl>
-              <p className="orders-total">
-                Montant total des commandes :{' '}
-                <strong>{orders.data.reduce((total, order) => total + orderTotal(order), 0)} €</strong>
-              </p>
+              <div className="orders-toolbar">
+                <p className="orders-total">
+                  Montant total des commandes :{' '}
+                  <strong>{orders.data.reduce((total, order) => total + orderTotal(order), 0)} €</strong>
+                </p>
+                <button
+                  className="add-button"
+                  type="button"
+                  disabled={orders.data.length === 0}
+                  onClick={() => exportOrders(orders.data)}
+                >
+                  Exporter en CSV <span aria-hidden="true">↓</span>
+                </button>
+              </div>
             </section>
             <DataTable
               caption="Toutes les commandes"

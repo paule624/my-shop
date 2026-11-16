@@ -16,10 +16,10 @@ function ProductCard({ product, onAddToCart, priority = false }: ProductCardProp
     <article className="product-card">
       {/* Redundant with the title link below: kept clickable for the mouse, but removed from
           the tab order and the accessibility tree (one link per card for keyboard / screen readers) */}
-      <Link className="product-image-link" to={`/products/${product.id}`} aria-hidden="true" tabIndex={-1}>
+      <Link className="product-image-link" to={`/products/${product.slug}`} aria-hidden="true" tabIndex={-1}>
         <div className="product-image-wrap">
-          {product.image && (
-            <ProductImage src={product.image} alt={product.imageAlt ?? product.name} sizes={CARD_IMAGE_SIZES} priority={priority} />
+          {product.image_url && (
+            <ProductImage src={product.image_url} alt={product.image_alt ?? product.name} sizes={CARD_IMAGE_SIZES} priority={priority} />
           )}
           {product.badge && <span className="product-badge">{product.badge}</span>}
           {product.category && <span className="product-category">{product.category}</span>}
@@ -27,19 +27,19 @@ function ProductCard({ product, onAddToCart, priority = false }: ProductCardProp
       </Link>
       <div className="product-details">
         <div className="product-title-row">
-          <h3><Link className="product-title-link" to={`/products/${product.id}`}>{product.name}</Link></h3>
+          <h3><Link className="product-title-link" to={`/products/${product.slug}`}>{product.name}</Link></h3>
           <span className="product-price">{product.price} €</span>
         </div>
         {product.description && <p>{product.description}</p>}
         <div className="product-actions">
-          <span className={product.inStock ? 'stock-status' : 'stock-status is-out'}>
+          <span className={product.in_stock ? 'stock-status' : 'stock-status is-out'}>
             <span aria-hidden="true" />
-            {product.inStock ? 'En stock' : 'Épuisé'}
+            {product.in_stock ? 'En stock' : 'Épuisé'}
           </span>
           <button
             className="add-button"
             type="button"
-            disabled={!product.inStock}
+            disabled={!product.in_stock}
             onClick={() => onAddToCart(product.id)}
           >
             Ajouter au panier

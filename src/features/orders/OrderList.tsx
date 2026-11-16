@@ -1,21 +1,29 @@
 import type { ReactNode } from 'react'
-import { useFetch } from '@/hooks/useFetch'
+import { useQuery } from '@tanstack/react-query'
 import type { Order, OrdersByStatus, OrderStatus, OrderSummary } from '@/types/orders'
 import { labelStatus, pluck } from '@/types/orders'
 
 const orderStatuses: OrderStatus[] = ['pending', 'paid', 'shipped', 'cancelled']
 
 function OrderList() {
-  const result = useFetch<Order[]>('/data/orders.json')
+  // Demo orders still come from the local JSON: real orders live in Supabase from milestone 3,
+  // and this page becomes the admin orders page in milestone 4
+  const result = useQuery({
+    queryKey: ['demo-orders'],
+    queryFn: async () => {
+      const response = await fetch('/data/orders.json')
+      if (!response.ok) throw new Error(`La requête a échoué (${response.status} ${response.statusText}).`)
+      return response.json() as Promise<Order[]>
+    },
+  })
   let content: ReactNode
 
   switch (result.status) {
-    case 'idle':
-    case 'loading':
+    case 'pending':
       content = <p className="fetch-message" role="status">Chargement des commandes…</p>
       break
     case 'error':
-      content = <p className="fetch-message error-message" role="alert">{result.message}</p>
+      content = <p className="fetch-message error-message" role="alert">{result.error.message}</p>
       break
     case 'success': {
       const ordersByStatus: OrdersByStatus = {

@@ -1,0 +1,10 @@
+-- Milestone 1: import the catalogue from the former public/data/products.json
+-- The old JSON id becomes the slug (used in URLs), the database generates a uuid id
+insert into products (slug, name, price, image_url, image_alt, description, category, badge, in_stock)
+values
+  ('lampe-aria', 'Lampe Aria', 129, 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=85', 'Lampadaire en métal gris anthracite à abat-jour en dôme, devant un mur blanc', 'Une lumière douce, un pied sculptural en céramique.', 'Lumière', 'Coup de cœur', true),
+  ('vase-sillage', 'Vase Sillage', 58, 'https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=900&q=85', 'Vase en verre ambré garni d’herbes de la pampa séchées, posé au sol à côté d’un canapé beige', 'Grès façonné à la main, chaque pièce est unique.', 'Décoration', 'Fait main', true),
+  ('tasse-atelier', 'Tasse Atelier', 24, 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=85', 'Tasse blanche aux formes arrondies posée sur une table blanche', 'Une anse généreuse et un émail vert profond.', 'Art de la table', null, true),
+  ('plaid-nuage', 'Plaid Nuage', 89, 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=85', 'Salon lumineux avec canapé en cuir camel, fauteuils blancs et plaid gris posé sur un fauteuil', 'Coton recyclé tissé dans les Hauts-de-France.', 'Textile', null, true),
+  ('plateau-ligne', 'Plateau Ligne', 46, 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=900&q=85', 'Salon aux grandes baies vitrées avec canapé gris, table basse en bois et poufs en cuir', 'Du chêne certifié, des lignes simples et durables.', 'Accessoires', 'Nouveau', true),
+  ('bougie-empreinte', 'Bougie Empreinte', 32, 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=900&q=85', 'Bougie allumée dans un photophore en verre, posée sur une fausse fourrure blanche entourée d’une guirlande lumineuse', 'Cire végétale, parfum de figuier et de bois blond.', 'Parfum', null, false);

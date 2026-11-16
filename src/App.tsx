@@ -3,11 +3,10 @@ import RouteAnnouncer from '@/components/RouteAnnouncer'
 import SiteFooter from '@/components/SiteFooter'
 import SiteHeader from '@/components/SiteHeader'
 import { Route, Routes, useLocation } from 'react-router-dom'
-import { useFetch } from '@/hooks/useFetch'
 import { useCart } from '@/hooks/useCart'
+import { useProducts } from '@/hooks/useProducts'
 import HomePage from '@/pages/HomePage'
 import ProductsPage from '@/pages/ProductsPage'
-import type { Product } from '@/types/ecommerce'
 import '@/App.css'
 
 // Main landing routes (/ and /products) stay in the main bundle to avoid an extra request before their LCP.
@@ -19,12 +18,10 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 function App() {
   const { cart, itemCount, addToCart, removeFromCart, clearCart } = useCart()
   const { pathname } = useLocation()
-  const productsResult = useFetch<Product[]>('/data/products.json')
-  const products = productsResult.status === 'success' ? productsResult.data : []
+  // Only needed for the product name in the page title; shares the cached catalogue query
+  const { data: products = [] } = useProducts()
   const pageProps = {
     cart,
-    products,
-    productsResult,
     onAddToCart: addToCart,
     onRemoveFromCart: removeFromCart,
     onClearCart: clearCart,
@@ -37,7 +34,7 @@ function App() {
         ? 'orders'
         : null
   // Human-readable page name, used for the tab title and the route change announcement
-  const productName = products.find((product) => pathname === `/products/${product.id}`)?.name
+  const productName = products.find((product) => pathname === `/products/${product.slug}`)?.name
   const pageTitle = pathname === '/'
     ? 'Accueil'
     : pathname === '/products'
@@ -66,7 +63,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage {...pageProps} />} />
           <Route path="/products" element={<ProductsPage {...pageProps} />} />
-          <Route path="/products/:id" element={<ProductDetailPage {...pageProps} />} />
+          <Route path="/products/:slug" element={<ProductDetailPage {...pageProps} />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

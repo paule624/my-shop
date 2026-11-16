@@ -1,14 +1,17 @@
+// Mirrors a row of the Supabase `products` table (snake_case columns, nullable columns as `| null`)
 export interface Product {
   id: string
+  // URL segment (/products/:slug), unique
+  slug: string
   name: string
   price: number
-  inStock: boolean
-  category?: string
-  description?: string
-  image?: string
+  in_stock: boolean
+  category: string | null
+  description: string | null
+  image_url: string | null
   // Describes what the photo actually shows (alt text); falls back to the product name
-  imageAlt?: string
-  badge?: string
+  image_alt: string | null
+  badge: string | null
 }
 
 export type CartLine = { productId: string; quantity: number }
@@ -70,10 +73,3 @@ export type CreateProductInput = Omit<Product, 'id'>
 
 // Use this type for the product editing form.
 export type UpdateProductInput = Partial<CreateProductInput>
-
-// Use this type for the cart, indexed by product ID.
-export type FetchResult<T> =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'success'; data: T }
-  | { status: 'error'; message: string }

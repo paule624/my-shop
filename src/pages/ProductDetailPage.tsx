@@ -1,15 +1,14 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CartPanel from '@/components/CartPanel'
 import ProductImage from '@/features/products/ProductImage'
-import type { Cart, FetchResult, Product } from '@/types/ecommerce'
+import { useProduct } from '@/hooks/useProducts'
+import type { Cart } from '@/types/ecommerce'
 
 // Detail image width per breakpoint, mirrors .shop-layout and .product-detail-card (max 720px) in App.css
 const DETAIL_IMAGE_SIZES = '(max-width: 720px) calc(100vw - 36px), (max-width: 1000px) calc(100vw - 328px), 720px'
 
 type ProductDetailPageProps = {
   cart: Cart
-  products: Product[]
-  productsResult: FetchResult<Product[]>
   onAddToCart: (productId: string) => void
   onRemoveFromCart: (productId: string) => void
   onClearCart: () => void
@@ -17,17 +16,14 @@ type ProductDetailPageProps = {
 
 function ProductDetailPage({
   cart,
-  products,
-  productsResult,
   onAddToCart,
   onRemoveFromCart,
   onClearCart,
 }: ProductDetailPageProps) {
-  const { id } = useParams<{ id: string }>()
+  const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const product = id && productsResult.status === 'success'
-    ? productsResult.data.find((item) => item.id === id)
-    : undefined
+  const productResult = useProduct(slug)
+  const product = productResult.data
 
   return (
     <main className="products-page">
@@ -46,20 +42,20 @@ function ProductDetailPage({
       </section>
       <div className="shop-layout">
         <section className="catalog-section" aria-live="polite">
-          {productsResult.status === 'idle' || productsResult.status === 'loading' ? (
+          {slug && productResult.isPending ? (
             <p className="fetch-message" role="status">Chargement du produit…</p>
-          ) : productsResult.status === 'error' ? (
-            <p className="fetch-message error-message" role="alert">{productsResult.message}</p>
-          ) : !id || !product ? (
+          ) : productResult.isError ? (
+            <p className="fetch-message error-message" role="alert">{productResult.error.message}</p>
+          ) : !slug || !product ? (
             <div className="fetch-message">
-              <p>{!id ? 'Identifiant de produit manquant.' : `Aucun produit avec l’identifiant « ${id} ».`}</p>
+              <p>{!slug ? 'Identifiant de produit manquant.' : `Aucun produit avec l’identifiant « ${slug} ».`}</p>
               <Link className="add-button" to="/products">Retour aux produits</Link>
             </div>
           ) : (
             <article className="product-detail-card">
               <div className="product-image-wrap">
-                {product.image && (
-                  <ProductImage src={product.image} alt={product.imageAlt ?? product.name} sizes={DETAIL_IMAGE_SIZES} priority />
+                {product.image_url && (
+                  <ProductImage src={product.image_url} alt={product.image_alt ?? product.name} sizes={DETAIL_IMAGE_SIZES} priority />
                 )}
                 {product.badge && <span className="product-badge">{product.badge}</span>}
                 {product.category && <span className="product-category">{product.category}</span>}
@@ -71,14 +67,14 @@ function ProductDetailPage({
                 </div>
                 {product.description && <p>{product.description}</p>}
                 <div className="product-actions">
-                  <span className={product.inStock ? 'stock-status' : 'stock-status is-out'}>
+                  <span className={product.in_stock ? 'stock-status' : 'stock-status is-out'}>
                     <span aria-hidden="true" />
-                    {product.inStock ? 'En stock' : 'Épuisé'}
+                    {product.in_stock ? 'En stock' : 'Épuisé'}
                   </span>
                   <button
                     className="add-button"
                     type="button"
-                    disabled={!product.inStock}
+                    disabled={!product.in_stock}
                     onClick={() => onAddToCart(product.id)}
                   >
                     Ajouter au panier <span aria-hidden="true">＋</span>
@@ -90,7 +86,6 @@ function ProductDetailPage({
         </section>
         <CartPanel
           cart={cart}
-          products={products}
           onRemove={onRemoveFromCart}
           onClear={onClearCart}
         />

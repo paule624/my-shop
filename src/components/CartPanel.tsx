@@ -1,13 +1,15 @@
-import type { Cart, Product } from '@/types/ecommerce'
+import { useProducts } from '@/hooks/useProducts'
+import type { Cart } from '@/types/ecommerce'
 
 type CartPanelProps = {
   cart: Cart
-  products: Product[]
   onRemove: (productId: string) => void
   onClear: () => void
 }
 
-function CartPanel({ cart, products, onRemove, onClear }: CartPanelProps) {
+function CartPanel({ cart, onRemove, onClear }: CartPanelProps) {
+  // Same cached query as the product list: no extra request, used to show product names
+  const { data: products = [] } = useProducts()
   const lines = Object.values(cart)
   const itemCount = lines.reduce((total, line) => total + line.quantity, 0)
   const getProductName = (productId: string) =>

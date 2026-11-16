@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { FetchResult, Product } from '@/types/ecommerce'
+import { useProducts } from '@/hooks/useProducts'
 import ProductCard from '@/features/products/ProductCard'
 import ProductCardSkeleton from '@/features/products/ProductCardSkeleton'
 
@@ -7,17 +7,17 @@ import ProductCardSkeleton from '@/features/products/ProductCardSkeleton'
 const DEFAULT_SKELETON_COUNT = 6
 
 type ProductListProps = {
-  result: FetchResult<Product[]>
   onAddToCart: (productId: string) => void
   maxItems?: number
 }
 
-function ProductList({ result, onAddToCart, maxItems }: ProductListProps) {
+function ProductList({ onAddToCart, maxItems }: ProductListProps) {
+  // Reads the catalogue straight from the React Query cache (no prop drilling from App)
+  const result = useProducts()
   let content: ReactNode
 
   switch (result.status) {
-    case 'idle':
-    case 'loading':
+    case 'pending':
       content = (
         <>
           <p className="sr-only" role="status">Chargement des produits…</p>
@@ -28,7 +28,7 @@ function ProductList({ result, onAddToCart, maxItems }: ProductListProps) {
       )
       break
     case 'error':
-      content = <p className="fetch-message error-message" role="alert">{result.message}</p>
+      content = <p className="fetch-message error-message" role="alert">{result.error.message}</p>
       break
     case 'success': {
       const products = maxItems === undefined ? result.data : result.data.slice(0, maxItems)

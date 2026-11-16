@@ -359,3 +359,12 @@
   .product-image-wrap { aspect-ratio: 1.35 / 1; }
   .product-title-row { align-items: baseline; flex-direction: row; }
 }
+
+/* Print: drop navigation, cart, images and buttons to save ink and paper (GreenIT best practice).
+   Kept inside the main stylesheet rather than a separate media="print" file, which would cost an extra request. */
+@media print {
+  .topbar, .cart-panel, .site-footer, .product-image-wrap, .add-button, .eyebrow-dot { display: none !important; }
+  .shop-layout { display: block; padding: 0; }
+  * { animation: none !important; box-shadow: none !important; }
+  :root, body, .intro-band, .orders-intro { background: #fff !important; }
+}

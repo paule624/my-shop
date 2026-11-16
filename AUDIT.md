@@ -10,6 +10,8 @@ Commits :
 | Performance | `75020a8` `perf: skeleton loading, responsive images, self-hosted fonts, route splitting` |
 | Accessibilité | `4084688` `a11y: fix text contrast, label-in-name on cart link, drop redundant product image links` |
 | Accessibilité (lecteur d'écran) | `9f76c6f` `a11y: semantic orders list, route change announcements and page titles` |
+| Accessibilité (images) | `acf1577` `a11y: descriptive image alt text, hide decorative back arrow` |
+| Éco-conception (CSS mort) | `360db06` `eco: remove dead Vite template CSS and unused variables` |
 | Éco-conception | `234357e` `eco: add lightweight favicon, robots.txt, print styles, remove unused template assets` |
 
 `npx tsc --noEmit` : ✅ aucune erreur.
@@ -116,6 +118,7 @@ Le gain est donc réel là où l'image d'origine était surdimensionnée (mobile
 
 | A4 | **Page Commandes structurée** : liste `<ul>` des commandes, paires `<dl>` libellé/valeur (« Client, camille@… »), libellé « Statut » réservé aux lecteurs d'écran, `<h2>` masqués visuellement « Résumé des commandes » et « Liste des commandes », résumé en `<section>` titrée. Apparence inchangée | Test **VoiceOver** : la page était lue comme un bloc de texte continu, sans liste, sans titre après le `h1` ni association libellé/valeur. L'`aria-label` posé sur une simple `<div>` était ignoré. Lighthouse ne le détectait pas (100) | VoiceOver : « liste, 4 éléments », 3 titres dans le rotor, paires lues ensemble · audits `list`, `listitem`, `definition-list`, `dlitem` ✅ |
 | A5 | **Navigation SPA annoncée** (`RouteAnnouncer`) : `document.title` propre à chaque route (« Commandes — maison moderne », nom du produit…) et région `aria-live="polite"` qui annonce la nouvelle page | Un changement de page côté client ne recharge rien : VoiceOver n'annonçait rien et le titre d'onglet était identique partout (WCAG 2.4.2, 4.1.3) | Titre distinct sur les 5 routes · annonce « Commandes » vérifiée avec VoiceOver |
+| A6 | **`alt` descriptifs** : champ `imageAlt` dans `products.json`, qui décrit ce que montre réellement la photo (« Tasse blanche aux formes arrondies posée sur une table blanche »), avec le nom du produit en repli. Flèche de « ← Retour à la boutique » en `aria-hidden` | L'`alt` répétait le nom du produit, déjà lu dans le `h1` de la fiche (« Lampe Aria », puis « Lampe Aria, image »), sans rien dire de la photo. VoiceOver lisait « flèche gauche » | Audit `image-alt` ✅ (déjà conforme avant, mais l'alt n'apportait rien) · plus de redondance titre/image |
 
 Score accessibilité : **95 → 100** sur les deux pages ; 100 aussi sur `/orders`, la fiche produit et la 404, en mobile et en desktop. Un lint statique `eslint-plugin-jsx-a11y` (règles *strict*) ne remonte aucune erreur.
 
@@ -136,6 +139,9 @@ Contrôles manuels :
 | E2 | **`robots.txt`** | Le serveur renvoyait `index.html` (fallback SPA) | SEO 92 → **100** |
 | E3 | **Styles d'impression** (`@media print`) : navigation, panier, images, boutons et animations masqués | Bonne pratique GreenIT « Fournir une print css » absente | Intégrés au CSS existant plutôt qu'en fichier séparé, pour ne pas ajouter de requête |
 | E4 | **Suppression des fichiers morts du template** : `icons.svg`, `hero.png`, `react.svg`, `vite.svg` | Fichiers jamais référencés ; `icons.svg` copié dans le build | −31 Ko dans le dépôt, −5 Ko dans le build déployé |
+| E5 | **CSS mort supprimé** : bloc du template Vite dans `App.css` (`.counter`, `.hero`, `#center`, `#next-steps`, `#docs`, `#spacer`, `.ticks`), `.quantity-control`, `.detail-back-link`, variables du mode sombre du template, règles `code`/`.counter`, 7 variables CSS inutilisées. Les règles du template encore actives (police de base 18px/145 %, `font-synthesis`, `#root` en flex, styles par défaut des `h1`/`h2`) sont conservées | Environ 200 lignes de CSS sans aucun élément correspondant, téléchargées et analysées à chaque visite | CSS 19,7 → **16,4 Ko** (gzip 5,1 → **4,3 Ko**, −16 %) · **0,00 % de pixels différents** sur 8 captures (4 pages, en mobile et en desktop) |
+
+Les exports TypeScript inutilisés (`describe`, `firstItem`, `applyEvent`, `carriers`, types `Create/UpdateProductInput`…) viennent des exercices de typage. Ils sont conservés : Vite les retire déjà du bundle (tree-shaking vérifié), donc les supprimer ne changerait rien pour le visiteur.
 
 La plus grosse réduction de poids vient des corrections perf **P2** (images −75 %) et **P3** (2 domaines tiers en moins). Elles valent aussi pour l'axe éco.
 
@@ -147,5 +153,7 @@ La plus grosse réduction de poids vient des corrections perf **P2** (images −
 - **42 Ko de JS « inutilisé ».** source-map-explorer montre qu'ils viennent de `react-dom` (203 Ko minifiés) et de `react-router` (37 Ko). Les pages ne pèsent que 6 Ko. Le code-splitting par route ne peut donc pas les supprimer, d'où un découpage limité aux routes secondaires (P4).
 - **Images sur desktop Retina** (voir § 3). Plafonner le `srcset` à 720 px réduirait le poids mesuré par GreenIT, au prix d'images moins nettes : non retenu.
 - **Cache HTTP (3/5 ressources) et HTTP/1.1.** Ces points relèvent de l'hébergement (en-têtes `Cache-Control`, HTTP/2), pas du code ; `vite preview` est un serveur local. Ils sont signalés, mais pas comptés comme corrections.
+- **Photos incohérentes avec les fiches produit** (problème de contenu, hors code). « Tasse Atelier, émail vert profond » montre une tasse blanche ; « Lampe Aria, pied en céramique » montre un lampadaire en métal ; « Vase Sillage », « Plaid Nuage » et « Plateau Ligne » montrent des salons entiers. Les `alt` décrivent fidèlement les photos, mais il faudrait des visuels propres à chaque produit.
+- **Pistes éco non appliquées.** Charger la police Fraunces sans l'axe de taille optique (`opsz`) ferait 67 → 37 Ko, soit −30 Ko par page, au prix d'un rendu un peu différent des grands titres. `products.json` est aussi chargé sur `/orders` sans y servir (1 requête, 1 Ko).
 - **CLS résiduel de 0,016** sur `.shop-layout` (`/products`), déjà présent avant les corrections.
 - **Première mesure écartée.** Le premier audit Lighthouse avait été fait sur le serveur de dev (`:5173`, React non minifié à 3,1 Mo, extensions Chrome actives). Il n'est pas représentatif et a été refait sur le build de production.

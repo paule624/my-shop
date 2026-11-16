@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import RouteAnnouncer from '@/components/RouteAnnouncer'
 import SiteFooter from '@/components/SiteFooter'
 import SiteHeader from '@/components/SiteHeader'
 import { Route, Routes, useLocation } from 'react-router-dom'
@@ -35,9 +36,21 @@ function App() {
       : pathname === '/orders'
         ? 'orders'
         : null
+  // Human-readable page name, used for the tab title and the route change announcement
+  const productName = products.find((product) => pathname === `/products/${product.id}`)?.name
+  const pageTitle = pathname === '/'
+    ? 'Accueil'
+    : pathname === '/products'
+      ? 'Boutique'
+      : pathname.startsWith('/products/')
+        ? productName ?? 'Fiche produit'
+        : pathname === '/orders'
+          ? 'Commandes'
+          : 'Page introuvable'
 
   return (
     <div className="app-shell">
+      <RouteAnnouncer title={pageTitle} />
       <SiteHeader
         activePage={activePage}
         cartCount={itemCount}

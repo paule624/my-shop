@@ -283,22 +283,24 @@
 .route-fallback { min-height: 100vh; }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .error-message { color: #a14337; }
-.orders-page { min-height: 650px; padding: 72px 0 90px; }
+/* At least one viewport tall: the footer stays below the fold from the lazy-route fallback (100vh) to the loaded orders, so it never shifts in view (CLS) */
+.orders-page { min-height: max(650px, 100vh); padding: 72px 0 90px; }
 .orders-intro { padding: 35px 40px; background: var(--green-wash); animation: appear 450ms ease-out both; }
 .orders-intro h1 { font-size: 46px; }
 .orders-intro > p:last-child { margin-top: 12px; color: var(--muted); font-size: 12px; }
 .orders-content { padding-top: 35px; }
-.order-summary-strip { display: grid; grid-template-columns: repeat(4,1fr); margin-bottom: 20px; border: 1px solid var(--line); }
+/* Orders: semantic <dl>/<ul> markup, default list and definition margins reset to keep the original layout */
+.order-summary-strip { display: grid; grid-template-columns: repeat(4,1fr); margin: 0 0 20px; border: 1px solid var(--line); }
 .summary-cell { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 13px 15px; border-right: 1px solid var(--line); }
 .summary-cell:last-child { border-right: 0; }
-.summary-cell span { color: var(--muted); font-size: 10px; }
-.summary-cell strong { color: var(--ink); font-size: 14px; }
-.order-list { border-top: 1px solid var(--line); }
-.order-row { display: grid; grid-template-columns: 1fr 1.6fr 1.2fr .8fr 1.25fr; align-items: center; gap: 16px; min-height: 77px; padding: 12px 10px; border-bottom: 1px solid var(--line); animation: appear 380ms ease-out both; }
+.summary-cell dt { color: var(--muted); font-size: 10px; }
+.summary-cell dd { margin: 0; color: var(--ink); font-size: 14px; font-weight: 700; }
+.order-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.order-row { display: grid; grid-template-columns: 1fr 1.6fr 1.2fr .8fr 1.25fr; align-items: center; gap: 16px; min-height: 77px; margin: 0; padding: 12px 10px; border-bottom: 1px solid var(--line); animation: appear 380ms ease-out both; }
 .order-row > div { min-width: 0; display: grid; gap: 5px; }
-.order-row > div span { color: var(--muted); font-size: 9px; }
-.order-row > div strong { overflow-wrap: anywhere; color: var(--ink); font-size: 11px; font-weight: 500; }
-.order-status { justify-self: start; padding: 7px 9px; background: #e5f1ea; color: #276747; font-size: 9px; }
+.order-row dt { color: var(--muted); font-size: 9px; }
+.order-row dd { margin: 0; overflow-wrap: anywhere; color: var(--ink); font-size: 11px; font-weight: 500; }
+.order-status { display: inline-block; justify-self: start; padding: 7px 9px; background: #e5f1ea; color: #276747; font-size: 9px; }
 .status-pending { background: #fbf0dc; color: #95641c; }
 .status-cancelled { background: #f7e6e3; color: #a14337; }
 .status-shipped { background: #e6edf6; color: #3b5f8e; }
@@ -336,7 +338,7 @@
   .add-button { gap: 4px; padding-inline: 7px; font-size: 9px; }
   .cart-panel { min-height: 0; }
   .empty-cart { min-height: 135px; }
-  .orders-page { min-height: 620px; padding: 45px 0 60px; }
+  .orders-page { min-height: max(620px, 100vh); padding: 45px 0 60px; }
   .orders-intro { padding: 28px 22px; }
   .orders-intro h1 { font-size: 37px; }
   .order-summary-strip { grid-template-columns: repeat(2,1fr); }

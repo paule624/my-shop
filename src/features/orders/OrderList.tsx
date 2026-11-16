@@ -31,40 +31,54 @@ function OrderList() {
 
       const totalRevenue = pluck(result.data, 'total').reduce((total, amount) => total + amount, 0)
 
+      // Semantic structure for screen readers: headings to navigate, a list of orders,
+      // and <dl> label/value pairs (read as "Client, camille@…") instead of anonymous divs
       content = (
         <>
-          <div className="order-summary-strip" aria-label="Résumé des commandes">
-            {orderStatuses.map((status) => (
-              <div className="summary-cell" key={status}>
-                <span>{labelStatus(status)}</span>
-                <strong>{ordersByStatus[status].length}</strong>
-              </div>
-            ))}
-          </div>
-          <p className="orders-total">Montant total des commandes : <strong>{totalRevenue} €</strong></p>
-          {result.data.length === 0 ? (
-            <p className="fetch-message">Aucune commande pour le moment.</p>
-          ) : (
-            <div className="order-list">
-              {result.data.map((order) => {
-                const summary: OrderSummary = {
-                  id: order.id,
-                  customerEmail: order.customerEmail,
-                  total: order.total,
-                }
+          <section aria-labelledby="orders-summary-title">
+            <h2 id="orders-summary-title" className="sr-only">Résumé des commandes</h2>
+            <dl className="order-summary-strip">
+              {orderStatuses.map((status) => (
+                <div className="summary-cell" key={status}>
+                  <dt>{labelStatus(status)}</dt>
+                  <dd>{ordersByStatus[status].length}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="orders-total">Montant total des commandes : <strong>{totalRevenue} €</strong></p>
+          </section>
+          <section aria-labelledby="orders-list-title">
+            <h2 id="orders-list-title" className="sr-only">Liste des commandes</h2>
+            {result.data.length === 0 ? (
+              <p className="fetch-message">Aucune commande pour le moment.</p>
+            ) : (
+              <ul className="order-list">
+                {result.data.map((order) => {
+                  const summary: OrderSummary = {
+                    id: order.id,
+                    customerEmail: order.customerEmail,
+                    total: order.total,
+                  }
 
-                return (
-                  <article className="order-row" key={summary.id}>
-                    <div><span>Commande</span><strong>{summary.id}</strong></div>
-                    <div><span>Client</span><strong>{summary.customerEmail}</strong></div>
-                    <div><span>Date</span><strong>{new Date(String(order.createdAt)).toLocaleDateString('fr-FR')}</strong></div>
-                    <div><span>Total</span><strong>{summary.total} €</strong></div>
-                    <span className={`order-status status-${order.status}`}>{labelStatus(order.status)}</span>
-                  </article>
-                )
-              })}
-            </div>
-          )}
+                  return (
+                    <li key={summary.id}>
+                      <dl className="order-row">
+                        <div><dt>Commande</dt><dd>{summary.id}</dd></div>
+                        <div><dt>Client</dt><dd>{summary.customerEmail}</dd></div>
+                        <div><dt>Date</dt><dd>{new Date(String(order.createdAt)).toLocaleDateString('fr-FR')}</dd></div>
+                        <div><dt>Total</dt><dd>{summary.total} €</dd></div>
+                        <div>
+                          {/* Label only for screen readers: the colored badge speaks for itself visually */}
+                          <dt className="sr-only">Statut</dt>
+                          <dd><span className={`order-status status-${order.status}`}>{labelStatus(order.status)}</span></dd>
+                        </div>
+                      </dl>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </section>
         </>
       )
       break

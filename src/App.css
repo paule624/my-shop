@@ -114,6 +114,8 @@
 .auth-form, .product-form { display: grid; max-width: 380px; gap: 8px; margin-top: 32px; }
 .auth-form label, .product-form label { margin-top: 10px; color: var(--ink); font-size: 12px; font-weight: 700; }
 .field-hint { color: var(--muted); font-weight: 400; }
+.product-form input[type="file"] { padding: 6px; font-size: 13px; line-height: 30px; }
+.product-form input[type="file"]::file-selector-button { height: 30px; margin-right: 12px; padding: 0 12px; border: 1px solid var(--ink); background: white; color: var(--ink); font: inherit; font-size: 12px; cursor: pointer; }
 /* 16px text avoids the iOS zoom on focus; border at 5:1 so the field outline is visible (WCAG 1.4.11) */
 .auth-form input, .product-form input:not([type="checkbox"]), .product-form textarea { min-height: 44px; padding: 0 12px; border: 1px solid var(--muted); background: white; color: var(--ink); font: inherit; font-size: 16px; }
 .form-message { margin-top: 6px; color: var(--muted); font-size: 13px; }

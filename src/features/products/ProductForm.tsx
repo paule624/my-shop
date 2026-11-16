@@ -7,7 +7,8 @@ type ProductFormProps = {
   submitLabel: string
   pending: boolean
   error: string | null
-  onSubmit: (values: CreateProductInput) => void
+  // imageFile: optional photo chosen in the form, uploaded instead of the URL field
+  onSubmit: (values: CreateProductInput, imageFile?: File) => void
   onCancel: () => void
 }
 
@@ -23,6 +24,8 @@ function ProductForm({ product, submitLabel, pending, error, onSubmit, onCancel 
     event.preventDefault()
     if (pending) return
     const form = new FormData(event.currentTarget)
+    // An empty file input still yields a File, with size 0
+    const imageFile = form.get('image_file')
     onSubmit({
       name: String(form.get('name')).trim(),
       slug: String(form.get('slug')).trim(),
@@ -33,7 +36,7 @@ function ProductForm({ product, submitLabel, pending, error, onSubmit, onCancel 
       description: optional(form.get('description')),
       image_url: optional(form.get('image_url')),
       image_alt: optional(form.get('image_alt')),
-    })
+    }, imageFile instanceof File && imageFile.size > 0 ? imageFile : undefined)
   }
 
   return (
@@ -58,6 +61,11 @@ function ProductForm({ product, submitLabel, pending, error, onSubmit, onCancel 
 
       <label htmlFor="product-image-url">URL de l’image</label>
       <input id="product-image-url" name="image_url" type="url" defaultValue={product?.image_url ?? ''} />
+
+      <label htmlFor="product-image-file">
+        Ou téléverser une photo <span className="field-hint">(remplace l’URL, convertie en WebP, 1200 px max)</span>
+      </label>
+      <input id="product-image-file" name="image_file" type="file" accept="image/jpeg,image/png,image/webp,image/avif" />
 
       <label htmlFor="product-image-alt">Texte alternatif <span className="field-hint">(ce que montre la photo)</span></label>
       <input id="product-image-alt" name="image_alt" defaultValue={product?.image_alt ?? ''} />

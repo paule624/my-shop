@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { compressImage } from '@/lib/images'
 import { supabase } from '@/lib/supabase'
 import type { CreateProductInput, Product } from '@/types/ecommerce'
 
@@ -68,16 +69,30 @@ export function useSaveProduct() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, values }: { id?: string; values: CreateProductInput }) => {
+    mutationFn: async ({ id, values, imageFile }: { id?: string; values: CreateProductInput; imageFile?: File }) => {
+      // A chosen file replaces the image URL: compressed, uploaded to Storage, then its public URL is saved
+      const row = imageFile ? { ...values, image_url: await uploadProductImage(imageFile) } : values
       const request = id
-        ? supabase.from('products').update(values).eq('id', id).select()
-        : supabase.from('products').insert(values).select()
+        ? supabase.from('products').update(row).eq('id', id).select()
+        : supabase.from('products').insert(row).select()
       const { data, error } = await request
       if (error) throw new Error(error.message)
       if (data.length === 0) throw new Error('Aucune ligne enregistrée : droits insuffisants.')
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
   })
+}
+
+// Uploads to the public product-images bucket (supabase/06-storage.sql: admin-only insert policy).
+// Unique name: never overwrites another product's image, and the URL can be cached forever.
+async function uploadProductImage(file: File): Promise<string> {
+  const image = await compressImage(file)
+  const path = `${crypto.randomUUID()}.${image.type === 'image/webp' ? 'webp' : 'jpg'}`
+  const { error } = await supabase.storage
+    .from('product-images')
+    .upload(path, image, { contentType: image.type, cacheControl: '31536000' })
+  if (error) throw new Error(error.message)
+  return supabase.storage.from('product-images').getPublicUrl(path).data.publicUrl
 }
 
 export function useDeleteProduct() {

@@ -84,9 +84,9 @@ function AdminProductsPage() {
           submitLabel={form.mode === 'edit' ? 'Enregistrer' : 'Créer le produit'}
           pending={saveProduct.isPending}
           error={saveProduct.error?.message ?? null}
-          onSubmit={(values) =>
+          onSubmit={(values, imageFile) =>
             saveProduct.mutate(
-              { id: form.mode === 'edit' ? form.product.id : undefined, values },
+              { id: form.mode === 'edit' ? form.product.id : undefined, values, imageFile },
               { onSuccess: closeForm },
             )
           }

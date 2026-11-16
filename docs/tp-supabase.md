@@ -9,6 +9,7 @@ Ce qu'a fait chaque jalon, les choix et leur raison, et les points de contrôle 
 | 3. Commander, mes commandes | `38fa2e3` `feat: checkout and my orders` | `03-orders-rls.sql` |
 | 4. Espace admin | `0ceaa96` `feat: admin dashboard and catalog management` | `04-admin.sql` |
 | Bonus | `a01edfd` tri / filtre / pagination serveur dans l'URL · `bb5dc73` export CSV | aucun |
+| Bonus | `3b0d789` commande atomique `place_order` · `0f0ccfd` upload d'image (Storage) | `05-place-order.sql`, `06-storage.sql` |
 
 ---
 
@@ -43,7 +44,7 @@ Ce qu'a fait chaque jalon, les choix et leur raison, et les points de contrôle 
 ## Jalon 3 : commander, mes commandes
 
 - **Panier** : il passe dans un store Zustand (`src/features/cart/store.ts`), qui réutilise le reducer pur `applyAction`. Chaque composant lit sa part du panier avec un sélecteur. Mesure : **12 rendus de `ProductCard` par ajout au panier avant, 0 après** (voir `AUDIT.md` § 6).
-- **Commande** : la mutation `usePlaceOrder` insère la commande, puis ses lignes. Ces deux insertions ne sont pas atomiques, c'est la simplification acceptée par le TP. En cas de succès, elle invalide `["orders"]` et vide le panier.
+- **Commande** : au départ, la mutation `usePlaceOrder` insérait la commande, puis ses lignes : deux insertions non atomiques, la simplification acceptée par le TP. Elle appelle maintenant la fonction SQL `place_order` (bonus, voir plus bas). En cas de succès, elle invalide `["orders"]` et vide le panier.
 - **`/account`** : la lecture utilise le select imbriqué `order_items(quantity, products(name, price))` pour afficher le détail et le total.
 - **`userId` dans la clé** `["orders", userId]` : c'est une entrée de cache par utilisateur, **pas** un filtre de sécurité.
 
@@ -96,9 +97,29 @@ Mesuré aussi avec le jeton d'un client :
 
 - **Tri, filtre et pagination côté serveur** sur `/products` : `.order()`, `.eq('category')`, `.range()` (4 produits par page) et `count: 'exact'` pour le nombre de pages. L'état vit dans l'URL (`?sort=price-desc&category=Textile&page=2`) : l'URL se partage et le bouton retour fonctionne. `keepPreviousData` garde la page affichée pendant le chargement de la suivante. Une page hors limites affiche une page vide au lieu d'une erreur 416.
 - **Export CSV** des commandes côté admin. Il est généré dans le navigateur depuis le cache, sans requête. Séparateur `;` et BOM UTF-8, pour un Excel français.
-- **Non fait, car il faut exécuter du SQL** :
-  - une fonction `place_order` appelée par `supabase.rpc()`, pour une commande atomique avec des prix lus côté serveur ;
-  - l'upload d'image avec Supabase Storage (bucket et policies).
+- **Commande atomique** (`05-place-order.sql`) : `supabase.rpc('place_order', { items })` envoie seulement les ids et les quantités.
+  - Une fonction Postgres s'exécute en **une seule transaction** : la commande et toutes ses lignes sont créées, ou rien du tout.
+  - Le serveur revérifie que chaque produit existe et est en stock.
+  - `security invoker` : la fonction tourne avec les droits de l'appelant, donc les policies des jalons 3 et 4 s'appliquent toujours (utilisateur = `auth.uid()`, statut forcé à `pending`). Elle n'ouvre aucun droit nouveau.
+- **Upload d'image** (`06-storage.sql`) : un champ fichier dans le formulaire produit. Le fichier est envoyé à l'enregistrement, pas au choix : annuler le formulaire n'envoie rien.
+  - Le navigateur redimensionne la photo à 1200 px et la convertit en WebP : **2,0 Mo (4000 px) → 111 Ko, −94 %** (éco-conception).
+  - Chaque fichier a un nom unique (`crypto.randomUUID()`) : on n'écrase jamais l'image d'un autre produit, et le CDN peut la garder en cache un an.
+  - Le bucket public impose ses limites côté serveur : 1 Mo maximum, images seulement.
+  - Les fichiers Storage sont des lignes de `storage.objects`, protégées par la RLS comme une table : seul `is_admin()` peut en ajouter.
+
+**Preuves dans la base** (API, avec les jetons des comptes de test) :
+
+| Tentative | Réponse |
+|---|---|
+| Commande dont la 2e ligne a une quantité de 0 | `23514` (contrainte `quantity > 0`), **0 commande créée** : la 1re insertion est annulée |
+| Commande d'un produit épuisé | `Un produit du panier n'est plus disponible.`, 0 commande créée |
+| Panier vide | `Le panier est vide.` |
+| Visiteur anonyme qui commande | `42501` (policy `insert own orders`) |
+| Client ou anonyme qui envoie une image | `403 new row violates row-level security policy` |
+| Admin qui envoie un fichier texte | `415 mime type text/plain is not supported` |
+| Admin qui envoie 1,5 Mo | `413 The object exceeded the maximum allowed size` |
+
+**Limite connue** : remplacer ou supprimer un produit laisse son ancienne image dans le bucket. Aucune policy de suppression n'existe, il faut nettoyer depuis le tableau de bord (Storage).
 
 ## Ménage de fin de TP
 

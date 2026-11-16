@@ -1,6 +1,6 @@
 # Maison Moderne
 
-Boutique de démonstration construite avec React et TypeScript strict. Le catalogue est servi par Supabase (Postgres + RLS), lu avec React Query. Copier `.env.example` en `.env` et exécuter les scripts de `supabase/` dans l'ordre (SQL Editor). Les commandes de démonstration restent dans `public/data/orders.json` jusqu'au jalon 4.
+Boutique de démonstration construite avec React et TypeScript strict. Le catalogue est servi par Supabase (Postgres + RLS), lu avec React Query. Copier `.env.example` en `.env` et exécuter les scripts de `supabase/` dans l'ordre (SQL Editor). Authentification Supabase (email + mot de passe), commandes par client et espace admin (`/admin`) protégés par les policies RLS.
 
 ## Démarrer
 

@@ -57,6 +57,8 @@
 .add-button:hover:not(:disabled) { border-color: var(--ink); background: var(--ink); color: white; }
 .add-button span { font-size: 14px; }
 .add-button:disabled { cursor: not-allowed; opacity: .45; }
+/* Busy state that keeps the button focusable (disabled would drop the keyboard focus) */
+.add-button[aria-disabled="true"] { cursor: progress; opacity: .45; }
 .cart-panel { align-self: start; min-height: 330px; padding: 20px; border: 1px solid var(--line); }
 .cart-panel-heading { align-items: start; margin-bottom: 22px; }
 .cart-panel-heading h2 { font-size: 22px; }
@@ -101,24 +103,46 @@
 .route-fallback { min-height: 100vh; }
 /* Auth and account pages: full height, so the footer stays put when the lazy page replaces the loader */
 .auth-page, .account-page { min-height: 100vh; }
-.auth-form { display: grid; max-width: 380px; gap: 8px; margin-top: 32px; }
-.auth-form label { margin-top: 10px; color: var(--ink); font-size: 12px; font-weight: 700; }
+.auth-form, .product-form { display: grid; max-width: 380px; gap: 8px; margin-top: 32px; }
+.auth-form label, .product-form label { margin-top: 10px; color: var(--ink); font-size: 12px; font-weight: 700; }
 .field-hint { color: var(--muted); font-weight: 400; }
 /* 16px text avoids the iOS zoom on focus; border at 5:1 so the field outline is visible (WCAG 1.4.11) */
-.auth-form input { min-height: 44px; padding: 0 12px; border: 1px solid var(--muted); background: white; color: var(--ink); font: inherit; font-size: 16px; }
+.auth-form input, .product-form input:not([type="checkbox"]), .product-form textarea { min-height: 44px; padding: 0 12px; border: 1px solid var(--muted); background: white; color: var(--ink); font: inherit; font-size: 16px; }
 .form-message { margin-top: 6px; color: var(--muted); font-size: 13px; }
 .auth-submit { justify-self: start; min-height: 40px; margin-top: 16px; font-size: 12px; }
 .auth-switch { margin-top: 20px; color: var(--muted); font-size: 13px; }
 .auth-switch a { color: var(--ink); }
+/* Admin: page, sub-navigation, table, dialogs */
+.admin-page { min-height: max(650px, 100vh); padding: 72px 0 90px; }
+.admin-nav { display: flex; gap: 22px; margin-top: 20px; }
+.admin-nav a { padding-bottom: 4px; color: var(--muted); font-size: 13px; text-decoration: none; }
+.admin-nav a[aria-current="page"] { border-bottom: 2px solid var(--coral); color: var(--ink); }
+.admin-create { min-height: 40px; padding: 0 16px; border-color: var(--ink); background: var(--ink); color: white; font-size: 12px; }
+.table-scroll { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; color: var(--ink); font-size: 12px; text-align: left; }
+.data-table th { padding: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 10px; font-weight: 500; white-space: nowrap; }
+.data-table td { padding: 14px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.cell-hint { color: var(--muted); font-size: 10px; }
+.row-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.danger-button { border-color: #a14337; color: #a14337; }
+.danger-button:hover:not(:disabled) { border-color: #a14337; background: #a14337; color: white; }
+.modal { width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 28px; border: 0; background: var(--bg, #fffefa); color: var(--ink); }
+.modal::backdrop { background: rgb(32 41 37 / .45); }
+.modal-title { margin: 0 0 12px; color: var(--ink); font-family: var(--display); font-size: 24px; }
+.modal-text { color: var(--muted); font-size: 13px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.modal-actions .auth-submit { margin-top: 0; }
+.product-form { max-width: none; margin-top: 8px; }
+.product-form textarea { padding: 10px 12px; resize: vertical; }
+.checkbox-field { display: flex; align-items: center; gap: 8px; }
 .account-orders-title { margin: 0 0 18px; color: var(--ink); font-family: var(--display); font-size: 26px; }
 .checkout-button { justify-content: center; width: 100%; min-height: 40px; margin-top: 14px; border-color: var(--ink); background: var(--ink); color: white; font-size: 12px; }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .error-message { color: #a14337; }
 /* At least one viewport tall: the footer stays below the fold from the lazy-route fallback (100vh) to the loaded orders, so it never shifts in view (CLS) */
-.orders-page { min-height: max(650px, 100vh); padding: 72px 0 90px; }
 .orders-intro { padding: 35px 40px; background: var(--green-wash); animation: appear 450ms ease-out both; }
 .orders-intro h1 { font-size: 46px; }
-.orders-intro > p:last-child { margin-top: 12px; color: var(--muted); font-size: 12px; }
+.orders-intro > p:not(.eyebrow) { margin-top: 12px; color: var(--muted); font-size: 12px; }
 .orders-content { padding-top: 35px; }
 /* Orders: semantic <dl>/<ul> markup, default list and definition margins reset to keep the original layout */
 .order-summary-strip { display: grid; grid-template-columns: repeat(4,1fr); margin: 0 0 20px; border: 1px solid var(--line); }
@@ -172,7 +196,7 @@
   .add-button { gap: 4px; padding-inline: 7px; font-size: 9px; }
   .cart-panel { min-height: 0; }
   .empty-cart { min-height: 135px; }
-  .orders-page { min-height: max(620px, 100vh); padding: 45px 0 60px; }
+  .admin-page { min-height: max(620px, 100vh); padding: 45px 0 60px; }
   .orders-intro { padding: 28px 22px; }
   .orders-intro h1 { font-size: 37px; }
   .order-summary-strip { grid-template-columns: repeat(2,1fr); }

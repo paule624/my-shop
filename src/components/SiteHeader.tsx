@@ -1,15 +1,17 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth/AuthContext'
 import { selectItemCount, useCartStore } from '@/features/cart/store'
+import { useIsAdmin } from '@/hooks/useProfile'
 import { supabase } from '@/lib/supabase'
 
 type SiteHeaderProps = {
-  activePage: 'home' | 'products' | 'orders' | 'account' | null
+  activePage: 'home' | 'products' | 'admin' | 'account' | null
 }
 
 function SiteHeader({ activePage }: SiteHeaderProps) {
   const { session, booted } = useAuth()
   const cartCount = useCartStore(selectItemCount)
+  const isAdmin = useIsAdmin()
 
   return (
     <header className="topbar">
@@ -24,9 +26,12 @@ function SiteHeader({ activePage }: SiteHeaderProps) {
         <Link className={`nav-link${activePage === 'products' ? ' is-active' : ''}`} to="/products">
           Boutique
         </Link>
-        <Link className={`nav-link${activePage === 'orders' ? ' is-active' : ''}`} to="/orders">
-          Commandes
-        </Link>
+        {/* Shown to admins only. Hiding a link is comfort, not security: the policies protect the data */}
+        {isAdmin && (
+          <Link className={`nav-link${activePage === 'admin' ? ' is-active' : ''}`} to="/admin">
+            Admin
+          </Link>
+        )}
       </nav>
       <div className="topbar-actions">
         {/* Rendered once the stored session is read: a signed-in user never sees "Connexion" flash */}

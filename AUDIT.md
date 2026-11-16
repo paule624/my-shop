@@ -9,6 +9,7 @@ Commits :
 | Base auditée (« avant ») | `faf575a` |
 | Performance | `75020a8` `perf: skeleton loading, responsive images, self-hosted fonts, route splitting` |
 | Accessibilité | `4084688` `a11y: fix text contrast, label-in-name on cart link, drop redundant product image links` |
+| Accessibilité (lecteur d'écran) | `9f76c6f` `a11y: semantic orders list, route change announcements and page titles` |
 | Éco-conception | `234357e` `eco: add lightweight favicon, robots.txt, print styles, remove unused template assets` |
 
 `npx tsc --noEmit` : ✅ aucune erreur.
@@ -113,9 +114,15 @@ Le gain est donc réel là où l'image d'origine était surdimensionnée (mobile
 | A2 | **Liens image produit redondants** : `aria-hidden="true"` + `tabIndex={-1}` (le lien du titre reste le lien accessible) | `aria-label="Voir {nom}"` ne contenait pas le texte visible des badges (WCAG 2.5.3) ; 2 liens identiques par carte | 6 échecs `label-content-name-mismatch` → **0** · 1 arrêt de tabulation en moins par carte |
 | A3 | **Lien panier** : nom calculé depuis le contenu (« Panier 0 article(s) »), « article(s) » en `.sr-only` ; sous 390 px, « Panier » est masqué visuellement au lieu de `display: none` | `aria-label` différent du texte visible ; sur petit écran, le nom ne contenait plus « Panier » | Échec → **conforme** |
 
-Score accessibilité : **95 → 100** sur les deux pages.
+| A4 | **Page Commandes structurée** : liste `<ul>` des commandes, paires `<dl>` libellé/valeur (« Client, camille@… »), libellé « Statut » réservé aux lecteurs d'écran, `<h2>` masqués visuellement « Résumé des commandes » et « Liste des commandes », résumé en `<section>` titrée. Apparence inchangée | Test **VoiceOver** : la page était lue comme un bloc de texte continu, sans liste, sans titre après le `h1` ni association libellé/valeur. L'`aria-label` posé sur une simple `<div>` était ignoré. Lighthouse ne le détectait pas (100) | VoiceOver : « liste, 4 éléments », 3 titres dans le rotor, paires lues ensemble · audits `list`, `listitem`, `definition-list`, `dlitem` ✅ |
+| A5 | **Navigation SPA annoncée** (`RouteAnnouncer`) : `document.title` propre à chaque route (« Commandes — maison moderne », nom du produit…) et région `aria-live="polite"` qui annonce la nouvelle page | Un changement de page côté client ne recharge rien : VoiceOver n'annonçait rien et le titre d'onglet était identique partout (WCAG 2.4.2, 4.1.3) | Titre distinct sur les 5 routes · annonce « Commandes » vérifiée avec VoiceOver |
+
+Score accessibilité : **95 → 100** sur les deux pages ; 100 aussi sur `/orders`, la fiche produit et la 404, en mobile et en desktop. Un lint statique `eslint-plugin-jsx-a11y` (règles *strict*) ne remonte aucune erreur.
+
+Effet de bord corrigé : sur `/orders`, l'écran d'attente du code-splitting (100vh), puis la page en cours de chargement, plus courte, faisaient remonter puis redescendre le pied de page (CLS mobile 0,11 sur 2 passages sur 3). `.orders-page` fait désormais au moins 100vh : **CLS 0 sur 3 passages**.
 
 Contrôles manuels :
+- test au clavier : `Tab` ne parcourt que les éléments interactifs (liens, boutons). Le contenu textuel se lit avec les commandes du lecteur d'écran (`VO + →`, rotor), c'est le comportement attendu ;
 - tous les `onClick` sont sur des `<button>` ;
 - aucun formulaire, donc aucun `label`/`htmlFor` à vérifier ;
 - un seul `<h1>` par page ;

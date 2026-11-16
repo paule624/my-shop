@@ -29,3 +29,8 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Lighthouse: only the final reference HTML reports (see AUDIT.md) are versioned
+lighthouse/*
+!lighthouse/final/
+lighthouse/final/*.json

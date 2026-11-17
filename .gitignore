@@ -13,6 +13,11 @@ dist-ssr
 *.local
 coverage/
 
+# Playwright reports and failure traces
+test-results/
+playwright-report/
+blob-report/
+
 # Local environment files
 .env*
 !.env.example

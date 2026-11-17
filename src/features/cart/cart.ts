@@ -1,3 +1,4 @@
+import { roundToCents } from '@/lib/money'
 import type { CartLine, Product } from '@/types/ecommerce'
 
 // Cart logic: pure functions, no React, no store. Tested in cart.test.ts, used by the Zustand store.
@@ -48,6 +49,5 @@ export function computeCartTotal(lines: CartLine[], products: Pick<Product, 'id'
     const product = products.find((candidate) => candidate.id === line.productId)
     return sum + (product ? product.price * line.quantity : 0)
   }, 0)
-  // Floating point: 24.9 * 3 = 74.69999999999999. Rounded to the cent.
-  return Math.round(total * 100) / 100
+  return roundToCents(total)
 }

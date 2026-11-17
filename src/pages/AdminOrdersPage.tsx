@@ -2,7 +2,7 @@ import DataTable, { type Column } from '@/components/DataTable'
 import AdminHeader from '@/features/admin/AdminHeader'
 import { useAllOrders } from '@/hooks/useOrders'
 import { downloadCsv } from '@/lib/csv'
-import { labelStatus, orderTotal, type AdminOrder, type OrderStatus } from '@/types/orders'
+import { labelStatus, orderTotal, ordersTotal, type AdminOrder, type OrderStatus } from '@/types/orders'
 
 const orderStatuses: OrderStatus[] = ['pending', 'paid', 'shipped', 'cancelled']
 
@@ -61,7 +61,7 @@ function AdminOrdersPage() {
               <div className="orders-toolbar">
                 <p className="orders-total">
                   Montant total des commandes :{' '}
-                  <strong>{orders.data.reduce((total, order) => total + orderTotal(order), 0)} €</strong>
+                  <strong>{ordersTotal(orders.data)} €</strong>
                 </p>
                 <button
                   className="add-button"

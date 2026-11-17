@@ -1,3 +1,4 @@
+import { roundToCents } from '@/lib/money'
 import type { CartLine } from '@/types/ecommerce'
 
 export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'cancelled'
@@ -34,7 +35,12 @@ export interface AdminOrder extends AccountOrder {
 
 // Computed from the current product prices (the TP schema stores no unit price on the line)
 export function orderTotal(order: AccountOrder): number {
-  return order.order_items.reduce((total, line) => total + line.quantity * line.products.price, 0)
+  return roundToCents(order.order_items.reduce((total, line) => total + line.quantity * line.products.price, 0))
+}
+
+// Sum of several orders (admin summary): rounded again, adding rounded amounts can drift too
+export function ordersTotal(orders: AccountOrder[]): number {
+  return roundToCents(orders.reduce((total, order) => total + orderTotal(order), 0))
 }
 
 export type OrderEvent =

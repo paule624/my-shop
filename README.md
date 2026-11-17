@@ -30,6 +30,7 @@ npm test            # Vitest : tests unitaires et de composants (src/**/*.test.t
 npm run test:e2e    # Playwright : parcours et accessibilité dans un vrai navigateur (e2e/), lance le serveur de dev tout seul
 npm run test:rls    # Sécurité de la base : les policies RLS testées sur le vrai Supabase (supabase/tests/)
 npm run build
+npm run storybook   # Catalogue des composants (http://localhost:6006), avec le panneau d'accessibilité
 ```
 
 - **Tests unitaires** (Vitest) : la logique pure. Panier (`src/features/cart/cart.ts`) et état d'URL du catalogue (`src/features/products/catalogParams.ts`).

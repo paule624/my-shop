@@ -8,6 +8,7 @@ Branche `seance-5`. Chaque étape, ce qu'elle protège, et la réponse au point 
 | 2. RTL, ce que l'utilisateur constate | `2e73724` `test: product card and pages` | 6 tests de composants |
 | 3. Playwright, parcours critique | `da06320` `test: e2e catalog to cart journey` | 2 parcours e2e (dont le bonus connexion) |
 | 4. Couverture | `581d756` `test: coverage report and readme score` | 29,79 % des lignes, noté dans le README |
+| Bonus Storybook | `chore: product card stories` | 3 stories de la carte produit, scannées par axe |
 
 **Rouge avant vert.** Chaque test a échoué au moins une fois. Pour chacun, on a cassé le code exprès, constaté le rouge, puis restauré : 17 mutations à l'étape 1, 8 à l'étape 2, 3 à l'étape 3. Aucun test n'est resté vert sous toutes les mutations.
 
@@ -100,6 +101,14 @@ Les tests tournent en `prefers-reduced-motion` : scannées pendant leur fondu d'
 - **Pas vu rouge : l'upload d'image refusé au client** (1 test sur 16). Ouvrir ce trou aurait laissé un fichier dans le stockage.
 - Ce rituel a aussi trouvé **deux tests faibles**, corrigés avant d'être validés. « L'anonyme ne peut pas commander » passait grâce au contrôle de stock : le produit visé était épuisé. Il vise maintenant un produit en stock et exige `42501`. Et le contrôle admin restait vrai pour un client qui ne voit que ses commandes.
 
-## Bonus Storybook
+## Bonus Storybook : le catalogue des composants
 
-Non fait : le TP le présente comme une information, pas comme un livrable de la séance.
+- **Installation** : `npx storybook@latest init` (Storybook 10, builder Vite), avec seulement les fonctionnalités `docs` et `a11y`. On a exclu `test` (il aurait modifié la config Vitest), l'onboarding, l'IA et la télémétrie. Les exemples générés (`src/stories/` : Button, Header, Page) sont supprimés.
+- **`.storybook/preview.tsx`** charge les mêmes polices et le même CSS que l'app, et entoure chaque story d'un `MemoryRouter`, puisque la carte contient des `<Link>`. Le panneau d'accessibilité (axe-core, le même moteur que nos tests e2e) scanne chaque story, et `a11y: { test: 'error' }` compte une violation comme un échec.
+- **`src/features/products/ProductCard.stories.tsx`** : la carte en 3 états, avec un vrai produit du catalogue écrit à la main (une story n'appelle jamais la base). Une largeur de colonne de la grille donne à la carte ses proportions réelles.
+  - **Standard**.
+  - **Nom très long** : le titre passe sur deux lignes, le prix descend dessous sans sortir de la carte, le bouton reste en place.
+  - **Épuisé** : statut « Épuisé », bouton désactivé (le même état que le test RTL).
+- **Vérifié** sur le Storybook construit (`npm run build-storybook`) : les 3 stories s'affichent sans erreur, et axe ne trouve **aucune violation WCAG 2.1 AA**.
+- **Commandes** : `npm run storybook` (http://localhost:6006) et `npm run build-storybook` (site statique dans `storybook-static/`, ignoré par Git et ESLint).
+- **À quoi ça sert** : on voit et on vérifie chaque état d'un composant sans parcourir l'app ni avoir de données réelles. Ce catalogue peut ensuite servir de base au test-runner Storybook et à la régression visuelle.

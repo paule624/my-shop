@@ -39,3 +39,6 @@ Thumbs.db
 lighthouse/*
 !lighthouse/final/
 lighthouse/final/*.json
+
+*storybook.log
+storybook-static

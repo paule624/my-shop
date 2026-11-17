@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { applyAction, type Cart } from '@/types/ecommerce'
+import { applyAction, type Cart } from '@/features/cart/cart'
 
 type CartState = {
   cart: Cart

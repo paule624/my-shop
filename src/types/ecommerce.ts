@@ -23,44 +23,6 @@ export function describe(line: CartLine | null): string {
   return `${line.quantity} article(s)`
 }
 
-export type CartAction =
-  | { type: 'addToCart'; productId: string; quantity: number }
-  | { type: 'removeFromCart'; productId: string }
-  | { type: 'clearCart' }
-  | { type: 'applyDiscount'; percent: number }
-
-export type Cart = Record<string, CartLine>
-
-export function applyAction(cart: Cart, action: CartAction): Cart {
-  switch (action.type) {
-    case 'addToCart': {
-      const existing = cart[action.productId]
-      return {
-        ...cart,
-        [action.productId]: {
-          productId: action.productId,
-          quantity: (existing?.quantity ?? 0) + action.quantity,
-        },
-      }
-    }
-    case 'removeFromCart': {
-      const nextCart = { ...cart }
-      delete nextCart[action.productId]
-      return nextCart
-    }
-    case 'clearCart': {
-      return {}
-    }
-    case 'applyDiscount': {
-      return cart
-    }
-    default: {
-      const _exhaustive: never = action
-      return _exhaustive
-    }
-  }
-}
-
 export function firstItem<T>(items: T[]): T | undefined {
   return items[0]
 }

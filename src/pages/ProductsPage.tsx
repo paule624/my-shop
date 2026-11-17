@@ -2,24 +2,20 @@ import type { ChangeEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import CartPanel from '@/components/CartPanel'
 import Pagination from '@/components/Pagination'
-import ProductList from '@/features/products/ProductList'
 import {
   PRODUCT_SORTS,
   PRODUCTS_PAGE_SIZE,
-  useProductPage,
-  useProducts,
-  type ProductSort,
-} from '@/hooks/useProducts'
-
-const isSort = (value: string | null): value is ProductSort => value !== null && value in PRODUCT_SORTS
+  pageHref,
+  parseCatalogParams,
+  withFilter,
+} from '@/features/products/catalogParams'
+import ProductList from '@/features/products/ProductList'
+import { useProductPage, useProducts } from '@/hooks/useProducts'
 
 function ProductsPage() {
   // Sort, filter and page live in the URL ("URL drawer"): shareable, bookmarkable, back button friendly
   const [searchParams, setSearchParams] = useSearchParams()
-  const sortParam = searchParams.get('sort')
-  const sort: ProductSort = isSort(sortParam) ? sortParam : 'name'
-  const category = searchParams.get('category')
-  const page = Math.max(1, Math.floor(Number(searchParams.get('page'))) || 1)
+  const { sort, category, page } = parseCatalogParams(searchParams)
 
   const productPage = useProductPage({ sort, category, page })
   // Category options from the cached catalogue (already loaded for the cart panel)
@@ -27,26 +23,11 @@ function ProductsPage() {
   const categories = [...new Set(allProducts.map((product) => product.category).filter((value) => value !== null))].sort()
   const totalPages = Math.ceil((productPage.data?.count ?? 0) / PRODUCTS_PAGE_SIZE)
 
-  // Changing the sort or the filter goes back to page 1; empty values are removed from the URL
   function updateFilter(key: 'sort' | 'category') {
-    return (event: ChangeEvent<HTMLSelectElement>) => {
-      setSearchParams((current) => {
-        const next = new URLSearchParams(current)
-        if (event.target.value) next.set(key, event.target.value)
-        else next.delete(key)
-        next.delete('page')
-        return next
-      })
-    }
+    return (event: ChangeEvent<HTMLSelectElement>) => setSearchParams((current) => withFilter(current, key, event.target.value))
   }
 
-  function hrefFor(target: number) {
-    const next = new URLSearchParams(searchParams)
-    if (target === 1) next.delete('page')
-    else next.set('page', String(target))
-    const query = next.toString()
-    return query ? `?${query}` : '/products'
-  }
+  const hrefFor = (target: number) => pageHref(searchParams, target)
 
   return (
     <main className="products-page">

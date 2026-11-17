@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { PRODUCT_SORTS, PRODUCTS_PAGE_SIZE, type CatalogParams } from '@/features/products/catalogParams'
 import { compressImage } from '@/lib/images'
 import { supabase } from '@/lib/supabase'
 import type { CreateProductInput, Product } from '@/types/ecommerce'
@@ -15,19 +16,9 @@ export function useProducts() {
   })
 }
 
-export const PRODUCT_SORTS = {
-  name: { label: 'Nom (A → Z)', column: 'name', ascending: true },
-  'price-asc': { label: 'Prix croissant', column: 'price', ascending: true },
-  'price-desc': { label: 'Prix décroissant', column: 'price', ascending: false },
-} as const
-export type ProductSort = keyof typeof PRODUCT_SORTS
-export const PRODUCTS_PAGE_SIZE = 4
-
-type ProductPageParams = { sort: ProductSort; category: string | null; page: number }
-
 // One page of the catalogue, sorted and filtered by the database (.order / .eq / .range):
 // only PRODUCTS_PAGE_SIZE rows travel, whatever the catalogue size. count gives the number of pages.
-export function useProductPage({ sort, category, page }: ProductPageParams) {
+export function useProductPage({ sort, category, page }: CatalogParams) {
   return useQuery({
     // Every URL parameter is part of the key: each page / sort / filter combination has its own cache entry
     queryKey: ['products', 'page', { sort, category, page }],

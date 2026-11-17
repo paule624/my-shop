@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/features/auth/AuthContext'
+import { computeCartTotal } from '@/features/cart/cart'
 import { selectItemCount, useCartStore } from '@/features/cart/store'
 import { usePlaceOrder } from '@/hooks/useOrders'
 import { useProducts } from '@/hooks/useProducts'
@@ -61,6 +62,9 @@ function CartPanel() {
               </button>
             </div>
           ))}
+          <p className="cart-total">
+            Total <strong>{computeCartTotal(lines, products)} €</strong>
+          </p>
           {session ? (
             <button
               className="add-button checkout-button"

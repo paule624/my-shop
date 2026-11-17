@@ -66,6 +66,40 @@ Branche `seance-5`. Chaque étape, ce qu'elle protège, et la réponse au point 
   - c'est une fonction pure : un test en quelques millisecondes.
 - On ne choisit **pas** un fichier d'affichage à 0 % (admin, détail produit) juste pour monter le score : le risque y est faible, et les parcours e2e les traversent déjà.
 
+## Après le TP : les tests ajoutés pour le risque
+
+Le TP couvrait la logique, les composants et un parcours. Trois risques restaient sans filet. On les a classés par gravité, et la montée en charge passe en dernier : sans serveur à nous, elle mesurerait l'offre gratuite de Supabase ou l'ordinateur local, pas notre code.
+
+| Commit | Test | Ce qu'il a trouvé ou prouvé |
+|---|---|---|
+| `ad2b1bc` `fix: round order totals to the cent` | `orderTotal`, `ordersTotal` (4 tests Vitest) | Le test choisi à l'étape 4 était **rouge dès sa création** : 74.69999999999999 €. Corrigé avec `roundToCents` (`src/lib/money.ts`), partagé avec le panier. |
+| `148a2d0` `test: automated accessibility checks in e2e` | axe-core dans Playwright, 9 états de pages en WCAG 2.1 AA | Protège le travail de la séance 3, y compris l'espace client et l'admin. |
+| `test: database security (RLS) checks` | 16 tests sur le vrai Supabase (`npm run test:rls`) | Les preuves des points de contrôle 3 et 4 deviennent automatiques. |
+
+**Accessibilité, mesuré.** Sous chaque régression, voici ce que voient les tests :
+
+| Régression | Vitest | Playwright + axe |
+|---|---|---|
+| Texte secondaire plus clair (`--muted` #676f6a → #a3aaa6) | vert | **9 pages rouges** |
+| Label Email détaché de son champ | 2 rouges (`getByLabelText`) | 5 rouges |
+| Photo du détail produit sans `alt` | vert | 1 rouge |
+| Champ Prix de l'admin sans label | vert | 1 rouge |
+
+Les tests tournent en `prefers-reduced-motion` : scannées pendant leur fondu d'apparition, les cartes semblaient manquer de contraste, ce qui donnait de faux échecs. L'app raccourcit déjà les animations dans ce mode, donc axe vérifie le rendu final.
+
+**Sécurité RLS** (`supabase/tests/rls.test.ts`). On teste avec la clé publique seulement, celle que tout visiteur trouve dans le JavaScript du site.
+- **Visiteur** : il lit le catalogue (contrôle) ; il ne lit aucune commande ; il ne crée pas de produit ; il ne commande pas (refus `42501`).
+- **Client** : il ne lit que ses commandes et ses lignes, même avec l'id d'une commande étrangère. Il ne commande ni au nom d'un autre ni « déjà payé ». Il ne crée, ne modifie ni ne supprime de produit (0 ligne touchée, produit intact). Il ne lit que son profil et ne peut pas le modifier. Il n'envoie pas d'image dans le stockage.
+- **Admin** (contrôles positifs) : il lit les commandes de plusieurs comptes et peut modifier un produit. Sans ces contrôles, un refus pourrait passer « par vide ».
+- **Aucun dégât possible, même si une policy casse** : les écritures interdites visent un produit jetable créé par l'admin pour le test, puis supprimé. Le test « se nommer admin » écrit `role = 'user'` : si la policy laissait passer, la ligne renvoyée le révèle, sans donner de droits.
+
+**Vu rouge pour de vrai.** On a ouvert des trous temporaires dans la base (`create policy "TEMP leak…"`), lancé la suite, puis tout refermé.
+- **Tour 1** (lire toutes les commandes, modifier les produits `rls-test-*`, modifier son profil) : 4 tests rouges, exactement ceux visés.
+- **Tour 2** (un anonyme lit les commandes ; lecture de tous les profils et de toutes les lignes ; création de produits `rls-hack-*`, de commandes et de lignes) : 8 tests rouges, exactement ceux visés. Les 5 lignes passées par les trous ont été supprimées par leur id, et la suite est revenue à 16/16.
+- **Contrôles admin** : exécutés avec l'identité du client, ils rougissent.
+- **Pas vu rouge : l'upload d'image refusé au client** (1 test sur 16). Ouvrir ce trou aurait laissé un fichier dans le stockage.
+- Ce rituel a aussi trouvé **deux tests faibles**, corrigés avant d'être validés. « L'anonyme ne peut pas commander » passait grâce au contrôle de stock : le produit visé était épuisé. Il vise maintenant un produit en stock et exige `42501`. Et le contrôle admin restait vrai pour un client qui ne voit que ses commandes.
+
 ## Bonus Storybook
 
 Non fait : le TP le présente comme une information, pas comme un livrable de la séance.

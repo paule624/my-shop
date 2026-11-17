@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:rls": "vitest run --config vitest.rls.config.ts",
     "preview": "vite preview"
   },
   "dependencies": {
